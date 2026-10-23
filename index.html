@@ -383,7 +383,7 @@ car.addEventListener('scroll',()=>{const i=Math.round(Math.abs(car.scrollLeft)/c
 const up=$('#up'),ring=$('#ring');
 addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-innerHeight,p=h>0?scrollY/h:0;ring.style.strokeDashoffset=163.4*(1-p);up.classList.toggle('show',scrollY>300)},{passive:true});
 up.onclick=()=>scrollTo({top:0,behavior:'smooth'});
-const SUPA={url:'',key:'',to:'ics.hle@iau.edu.sa'};
+const SUPA={url:'https://hwhggihcugnrdwhcuqkr.supabase.co/rest/v1/',key:'‏eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3aGdnaWhjdWducmR3aGN1cWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NDYyODksImV4cCI6MjEwODMyMjI4OX0.vWzx8W0-ZJg1e7mNBta_O5Hx3hAnTZcgYoZb4qXp25E',to:'ics.hle@iau.edu.sa'};
 const ST={g(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const mkref=()=>'BK-'+N0.toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
 const isW=id=>ST.g('bk_w',[]).includes(String(id));
