@@ -66,7 +66,7 @@ nav a.on,.mm a.on{background:var(--teal);color:#fff}nav a.pt,.mm a.pt{text-decor
 .pc{text-align:center}.pc b{display:grid;place-items:center;width:78px;height:78px;margin:0 auto 6px;border-radius:50%;background:var(--beige);border:3px solid var(--sky);color:var(--teal);font-size:26px}
 .tl{border-inline-start:3px solid var(--sky);padding-inline-start:16px;display:grid;gap:12px}.tl div{position:relative}.tl div::before{content:"";position:absolute;inset-inline-start:-24px;top:8px;width:13px;height:13px;border-radius:50%;background:var(--green);border:3px solid #fff}
 .portals{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-.portal{border-radius:22px;padding:22px;color:#fff;cursor:pointer;background:linear-gradient(150deg,var(--teal),var(--deep));border-start-start-radius:80px;transition:transform .2s}.portal:hover{transform:translateY(-4px)}.portal h3{color:#fff}.portal p{margin:4px 0;color:#dce8f0;font-size:14px}.portal.g{background:linear-gradient(150deg,#d9bf86,#a8864a)}.portal.g h3,.portal.g p,.portal.g span{color:var(--deep)}.portal.n{background:linear-gradient(150deg,#1f4c7d,#0c3254)}.portal span{font-size:34px}
+.portal{border-radius:22px;padding:22px;color:#fff;cursor:pointer;background:linear-gradient(150deg,var(--teal),var(--deep));border-start-start-radius:80px;transition:transform .2s}.portal:hover{transform:translateY(-4px)}#wz .portal{display:flex;flex-direction:column;align-items:center;text-align:center;border-radius:22px;padding:26px 20px}#wz .portal>span{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:#ffffff1f;border:2px solid #ffffff66;margin-bottom:12px}#wz .portal h3{margin:0 0 6px;font-size:20px}#wz .portal p{margin:0;line-height:1.7}.portal.lock{opacity:.6;cursor:not-allowed;filter:grayscale(.45);position:relative}.portal.lock:hover{transform:none}.soonb{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:4px 12px;border-radius:99px;background:#ffffff26;border:1px solid #ffffff55;font-style:normal;font-size:13px;font-weight:700}.portal h3{color:#fff}.portal p{margin:4px 0;color:#dce8f0;font-size:14px}.portal.g{background:linear-gradient(150deg,#d9bf86,#a8864a)}.portal.g h3,.portal.g p,.portal.g span{color:var(--deep)}.portal.n{background:linear-gradient(150deg,#1f4c7d,#0c3254)}.portal span{font-size:34px}
 form label{display:block;font-weight:600;font-size:14px;margin-top:8px}input,select,textarea{width:100%;font:inherit;border:1px solid var(--line);background:#fff;border-radius:12px;padding:6px 12px;outline:0}input:focus,select:focus,textarea:focus{border-color:var(--teal)}
 .row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.cb label{display:inline-flex;gap:6px;align-items:center;font-weight:400;margin:4px 0 0 14px}.cb input{width:auto}
 .meta{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.meta div{background:var(--beige);border-radius:14px;padding:8px 12px}.meta small{display:block;color:var(--mut);font-size:12px}
@@ -316,7 +316,7 @@ setTimeout(kill,rm?1200:3300)})();</script>
 <div class="pg" id="about"><div class="w">
  <div class="hd"><h2>عن بيت الخبرات</h2></div><div class="card top"><h3>النبذة</h3><p id="ab1"></p></div>
  <div class="grid" style="margin-top:16px"><div class="card top"><h3>الرؤية</h3><p id="vs"></p></div><div class="card top"><h3>الرسالة</h3><p id="ms"></p></div></div>
- <div class="hd" style="margin-top:30px"><h2>رئاسة بيت الخبرات</h2></div><div class="tm" id="fd"></div>
+ 
  <div class="hd" style="margin-top:30px"><h2>ما الذي يميزنا؟</h2></div><div class="grid" id="why"></div>
  <div class="hd" style="margin-top:30px"><h2>الفئات التي نرحب بالشراكة معها</h2></div><div class="grid" id="aud"></div></div></div>
 
@@ -337,9 +337,10 @@ setTimeout(kill,rm?1200:3300)})();</script>
 <div class="pg" id="partner"><div class="w" id="pd"></div></div>
 
 <div class="pg" id="contact"><div class="w"><div class="hd"><h2>تواصل معنا</h2></div>
- <div class="grid"><div class="card top"><h3>بيانات التواصل</h3><p>الهاتف: 0560072455</p><p>البريد: ics.hle@iau.edu.sa</p><p><a class="btn s" target="_blank" rel="noopener" href="https://www.iau.edu.sa/ar/administration/centers/institute-of-consulting-studies/services/experience-houses/house-of-legal-experiences">الصفحة الرسمية في الجامعة</a></p></div><div class="card top"><h3>رئيس بيت الخبرات</h3><p>د. عبدالسلام بن عبدالله الوهيبي</p></div><div class="card top"><h3>نائب الرئيس</h3><p>د. فيصل بن يعقوب الزامل السليم</p></div></div>
- <form class="card" style="margin-top:16px" onsubmit="return sendC(this)"><h3>راسلنا عبر المنصة</h3><div class="row"><div><label>الاسم</label><input name="name" required></div><div><label>الجوال</label><input name="phone" required></div><div><label>البريد</label><input name="email" type="email" required></div><div><label>الموضوع</label><select name="topic" id="ctopic"><option>استفسار عام</option><option>طلب استشارة</option><option>دورة تدريبية</option><option>شراكة</option></select></div></div><label>رسالتك</label><textarea name="body" id="cbody" rows="4" required></textarea><p><button class="btn p">إرسال</button></p></form><div id="ref" style="margin-top:12px"></div>
- <div class="hd" style="margin-top:30px"><h2>تتبّع طلبك</h2></div><form class="card" onsubmit="return track(this)"><label>رقم المتابعة</label><div class="sf"><input name="n" dir="ltr" style="flex:1;border:1px solid var(--line)" placeholder="BK-20261020-ABCD" required><button class="go">تتبّع</button></div></form><div id="tr" style="margin-top:12px"></div></div></div>
+  <div class="hd" style="margin-top:6px"><h2>إدارة بيت الخبرات</h2></div><div class="tm" id="fdc"></div>
+  <div class="card top" style="margin-top:18px"><h3>بيانات التواصل</h3><p>الهاتف: <a href="tel:0560072455" dir="ltr">0560072455</a></p><p>البريد: <a href="mailto:ics.hle@iau.edu.sa">ics.hle@iau.edu.sa</a></p><p><a class="btn s" target="_blank" rel="noopener" href="https://www.iau.edu.sa/ar/administration/centers/institute-of-consulting-studies/services/experience-houses/house-of-legal-experiences">الصفحة الرسمية في الجامعة</a></p></div>
+  <form class="card" style="margin-top:16px" onsubmit="return sendC(this)"><h3>راسلنا عبر المنصة</h3><div class="row"><div><label>الاسم</label><input name="name" required></div><div><label>الجوال</label><input name="phone" required></div><div><label>البريد</label><input name="email" type="email" required></div><div><label>الموضوع</label><select name="topic" id="ctopic"><option>استفسار عام</option><option>طلب استشارة</option><option>دورة تدريبية</option><option>شراكة</option></select></div></div><label>رسالتك</label><textarea name="body" id="cbody" rows="4" required></textarea><p><button class="btn p">إرسال</button></p></form><div id="ref" style="margin-top:12px"></div></div></div>
+
 <div class="pg" id="join"><div class="w"><div class="hd"><h2>انضم إلينا</h2></div><div id="wz"></div></div></div>
 <div class="pg" id="portal"><div class="w">
  <div class="auth"><img id="alg" alt="شعار بيت الخبرات القانونية">
@@ -353,12 +354,12 @@ setTimeout(kill,rm?1200:3300)})();</script>
    <form onsubmit="return signup(this)"><label>الاسم *</label><input name="name" required><label>البريد الإلكتروني *</label><input name="email" type="email" required><label>الجوال</label><input name="phone"><label>كلمة المرور *</label><input name="password" type="password" minlength="6" required><div style="height:14px"></div><button class="gb">إنشاء الحساب والدخول</button></form>
    <p class="sw">لديك حساب؟ <a data-sw="avl" role="button" tabindex="0">سجّل الدخول</a></p></div></div>
  <div class="hd" style="margin-top:34px"><h2>بوابات المنصة</h2></div><div class="portals" id="ptl2"></div>
- <div class="hd" style="margin-top:30px"><h2>التحقق من شهادة</h2></div><form class="card" onsubmit="return vf(this)"><label>رقم الشهادة</label><div class="sf"><input name="n" style="flex:1;border:1px solid var(--line)" required><button class="go">تحقق</button></div></form></div></div>
+ </div></div>
 <div class="pg" id="dash"><div class="w"><div class="dash"><div class="side" id="ds"></div><div id="dc"></div></div></div></div>
 </main>
 
 <footer><div class="w">
- <div class="fb"><span>هل كانت هذه الصفحة مفيدة؟</span><button class="btn s" onclick="t('شكرًا لتقييمك')">نعم</button><button class="btn s" onclick="t('شكرًا، سنعمل على تحسينها')">لا</button><span id="upd"></span></div>
+ <div class="fb"><span id="fbq">هل كانت هذه الصفحة مفيدة؟</span><span id="fbb"><button class="btn s" data-fb="1">نعم</button> <button class="btn s" data-fb="0">لا</button></span><span id="upd"></span></div>
  <a class="bk-map" id="bkLoc" href="https://maps.app.goo.gl/m4xno9K9PUjGAqu47?g_st=ipc" target="_blank" rel="noopener" aria-label="فتح موقع معهد الدراسات والخدمات الاستشارية، مبنى D19، في خرائط Google">
  <div class="fr"><iframe title="خريطة موقع المعهد" src="https://www.google.com/maps?q=%D9%85%D8%B9%D9%87%D8%AF%20%D8%A7%D9%84%D8%AF%D8%B1%D8%A7%D8%B3%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D9%8A%D8%A9%20%D8%AC%D8%A7%D9%85%D8%B9%D8%A9%20%D8%A7%D9%84%D8%A5%D9%85%D8%A7%D9%85%20%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D8%B1%D8%AD%D9%85%D9%86%20%D8%A8%D9%86%20%D9%81%D9%8A%D8%B5%D9%84%20%D9%85%D8%A8%D9%86%D9%89%20D19&hl=ar&z=17&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" tabindex="-1" aria-hidden="true"></iframe></div>
  <div class="cap"><span class="pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span>
@@ -402,7 +403,7 @@ let NEWS=[
  {id:'n1',k:'لقاء',t:'لقاء «بطلان حكم التحكيم»',d:'الإثنين 14 سبتمبر 2026',x:'لقاء عن بُعد مع الأستاذ حسان السيف، محكّم ووسيط ومستشار قانوني، يديره د. عبدالسلام الوهيبي. الساعة 8:30 مساءً.',img:'var(--a2)',ar:'900/1600'},
  {k:'إعلان',t:'قريبًا: المدخل إلى نظام المعاملات المدنية',d:'إعلان',x:'يقدمه فضيلة الأستاذ الدكتور يوسف بن عبدالله الشبيلي، ويُعلن الموعد قريبًا.',c:1},
  {k:'لقاء',t:'لقاء «تجربة المحاماة» ضمن برنامج المرشد المهني القانوني',d:'1 – 2 سبتمبر 2026',x:'بمشاركة عمر إبراهيم العمودي ود. خالد العمّاري وخالد المهيري، من تنظيم بيت الخبرات القانونية.',c:2}];
-let FAQ=[['من نحن؟',ABOUT],['ما آلية طلب الاستشارة؟','١) تقديم الطلب: عبّئ نموذج طلب الاستشارة موضحًا الجهة ومجال الاستشارة.\n٢) تحديد النطاق: جلسة تعريفية قصيرة لتحديد الاحتياج ونطاق العمل والمخرجات.\n٣) تنفيذ الاستشارة: تنفيذ الجلسات أو إعداد التقارير والمخرجات المتفق عليها.\n\nتُقدَّر أتعاب الاستشارة حسب النطاق والمخرجات المتفق عليها، ويتواصل معك فريقنا بعد استلام الطلب.'],['ما آلية التنفيذ وطرق تقديم خدماتكم؟','الجلسات الاستشارية (حضورية أو عن بُعد)، والأعمال القانونية المكتوبة، والعمل داخل الجهة، والبرامج التدريبية والورش، والباقات المصممة حسب الاحتياج.'],['لماذا بيت الخبرات؟','تكامل الخبرة الأكاديمية والتطبيقية، وخدمات قانونية شاملة، وتخصص في المجالات ذات الأولوية، وسرعة في الدراسة وتجاوب مع العميل، وباقات مرنة، وجودة وشفافية في المتابعة، ونخبة من الخبراء والمستشارين.'],['ما خدماتكم؟','استشارات قانونية، اللوائح والمذكرات، الدراسات الأكاديمية، العقود، حوكمة الإدارات القانونية، تدريب الأخصائيين، العدالة الوقائية، الوساطة والتحكيم.'],['ما المجالات القانونية؟','القضاء الإداري، الشركات والقضايا التجارية، الزكاة والضريبة والجمارك، المنازعات التأمينية والطبية والعمالية.'],['متى الدورة القادمة؟','برنامج «المدخل إلى نظام المعاملات المدنية» قريبًا، ويُعلن موعده من بيت الخبرات.'],['وسائل التواصل','0560072455 · ics.hle@iau.edu.sa']];
+let FAQ=[['من نحن؟',ABOUT],['ما آلية طلب الاستشارة؟','١) تقديم الطلب: عبّئ نموذج طلب الاستشارة موضحًا الجهة ومجال الاستشارة.\n٢) تحديد النطاق: جلسة تعريفية قصيرة لتحديد الاحتياج ونطاق العمل والمخرجات.\n٣) تنفيذ الاستشارة: تنفيذ الجلسات أو إعداد التقارير والمخرجات المتفق عليها.\n\nتُقدَّر أتعاب الاستشارة حسب النطاق والمخرجات المتفق عليها، ويتواصل معك فريقنا بعد استلام الطلب.'],['ما آلية التنفيذ وطرق تقديم خدماتكم؟','الجلسات الاستشارية (حضورية أو عن بُعد)، والأعمال القانونية المكتوبة، والعمل داخل الجهة، والبرامج التدريبية والورش، والباقات المصممة حسب الاحتياج.'],['لماذا بيت الخبرات؟','تكامل الخبرة الأكاديمية والتطبيقية، وخدمات قانونية شاملة، وتخصص في المجالات ذات الأولوية، وسرعة في الدراسة وتجاوب مع العميل، وباقات مرنة، وجودة وشفافية في المتابعة، ونخبة من الخبراء والمستشارين.'],['ما خدماتكم؟','استشارات قانونية، اللوائح والمذكرات، الدراسات الأكاديمية، العقود، حوكمة الإدارات القانونية، تدريب الأخصائيين، العدالة الوقائية، الوساطة والتحكيم.'],['ما المجالات القانونية؟','القضاء الإداري، الشركات والقضايا التجارية، الزكاة والضريبة والجمارك، المنازعات التأمينية والطبية والعمالية.'],['متى الدورة القادمة؟','برنامج «المدخل إلى نظام المعاملات المدنية» قريبًا، ويُعلن موعده من بيت الخبرات.'],['كيف أسجل في دورة؟','سجّل دخولك كفرد مشترك من صفحة «تسجيل الدخول»، ثم افتح البرنامج واضغط «سجّل الآن». وإن كان البرنامج قادمًا بدون موعد معلن، اضغط «سجّل اهتمامك» وسنخبرك عند إعلان الموعد.'],['هل يمكنني الانضمام كشريك؟','الانضمام كشريك مقدم برامج سيُتاح قريبًا بإذن الله.'],['أين موقعكم؟','معهد الدراسات والخدمات الاستشارية، مبنى D19، جامعة الإمام عبدالرحمن بن فيصل. وتجد الخريطة أسفل الصفحة.'],['وسائل التواصل','0560072455 · ics.hle@iau.edu.sa']];
 let AL=[];
 const pub=()=>CO.filter(c=>c.pb);
 const NAV=[['home','الرئيسية'],['about','عن بيت الخبرات'],['services','خدماتنا'],['courses','الدورات والبرامج'],['calendar','التقويم'],['news','الأخبار'],['partners','شركاء بيت الخبرات'],['contact','تواصل معنا'],['join','انضم إلينا']];
@@ -416,7 +417,7 @@ const bd=c=>`<span class="bd ${c.st}">${STL[c.st]}</span>`;
 const prv=c=>c.pr.map(i=>PA.find(p=>p.id==i)).filter(Boolean);
 const poster=c=>c.img?adBox(c):`<div class="poster" data-c="${c.id}"><div>${bd(c)}</div><h3>${X(c.t)}</h3><div class="tg"><span>${dtx(c)}</span></div></div>`;
 const mini=c=>`<div class="card top">${c.img?thumb(c):''}<div>${bd(c)} <span class="chip">${c.ty}</span></div><h3 style="margin-top:6px">${X(c.t)}</h3><p>${I('calendar',16)} ${dtx(c)}</p>${c.time?`<p>${I('clock',16)} ${c.time}</p>`:''}<p>${I('user',16)} ${prv(c).map(p=>X(p.n)).join('، ')||TBD}</p><p><button class="btn p s" data-c="${c.id}">التفاصيل</button> ${c.st!='past'?`<button class="btn s" data-w="${c.id}">${I('bell',14)} ${isW(c.id)?'تم التفعيل':'نبّهني'}</button>`:''}</p></div>`;
-const pcard=p=>`<div class="card top pc" data-p="${p.id}" tabindex="0"><span class="av">${I('user',34)}</span><h3>${X(p.n)}</h3><p>${X(p.r)}</p>${p.pend?'<span class="chip">النبذة قيد الاعتماد</span>':''}</div>`;
+const pcard=p=>`<div class="card top pc" data-p="${p.id}" tabindex="0"><span class="av">${I('user',34)}</span><h3>${X(p.n)}</h3><p>${X(p.r)}</p></div>`;
 const em=(t,a)=>`<div class="card empty">${I('inbox',30)}<p>${t}</p>${a||''}</div>`;
 function build(){
  $('#ab0').textContent=ABOUT;$('#ab1').textContent=ABOUT;$('#vs').textContent=VIS;$('#ms').textContent=MIS;
@@ -427,7 +428,7 @@ function build(){
  $('#pk').innerHTML=L(PK,x=>`<div class="card top"><h3>${x}</h3><p><button class="btn s p" data-go="contact">اطلب العرض</button></p></div>`);
  $('#why').innerHTML=L(WHY,x=>`<div class="card top"><h3>${x}</h3></div>`);
  $('#aud').innerHTML=L(AUD,x=>`<div class="card"><h3>${x}</h3></div>`);
- $('#fd').innerHTML=tmHTML();
+ $('#fdc').innerHTML=tmHTML(1);
  $('#hp').innerHTML=L(PA,pcard);$('#pl').innerHTML=L(PA,pcard);
  $('#nw').innerHTML=L(NEWS,nc);$('#nl').innerHTML=L(NEWS,nc);
  $('#ints').innerHTML=L(FIELDS,x=>`<label><input type="checkbox"> ${x[0]}</label>`);
@@ -443,12 +444,16 @@ function build(){
 const nc=n=>`<div class="card top">${n.img?thumb(n):''}<span class="chip">${n.d}</span><h3 style="margin-top:6px">${n.t}</h3><p>${n.x}</p><p>${n.c?`<button class="btn s" data-c="${n.c}">التفاصيل</button> `:''}<button class="btn s" data-sh="1">${I('link',14)} مشاركة</button></p></div>`;
 let CF='';
 function fc(){const v=$('#cs').value.trim(),r=pub().filter(c=>(!CF||c.st==CF)&&(!v||c.t.includes(v)));$('#cl').innerHTML=L(r,mini)||em('لا برامج مطابقة.')}
-function nav(en){const h=L(NAV,n=>`<a data-go="${n[0]}" tabindex="0">${en?EN[n[0]]:n[1]}</a>`);$('#nav').innerHTML=h;$('#mm').innerHTML=h+(en?'':'<a data-go="contact" tabindex="0">طلب استشارة</a><a data-go="portal" tabindex="0">التحقق من شهادة</a>')}
+function nav(en){const h=L(NAV,n=>`<a data-go="${n[0]}" tabindex="0">${en?EN[n[0]]:n[1]}</a>`);$('#nav').innerHTML=h;$('#mm').innerHTML=h+(en?'':'<a data-go="contact" tabindex="0">طلب استشارة</a>')}
 function go(id){document.querySelectorAll('.pg').forEach(p=>p.classList.toggle('on',p.id==id));document.querySelectorAll('nav a,.mm a').forEach(a=>a.classList.toggle('on',a.dataset.go==id));$('#mm').classList.remove('open');
- $('#bc').innerHTML=id=='home'?'':`<a data-go="home" tabindex="0">الرئيسية</a> / <b>${TT[id]||''}</b>`;scrollTo({top:0,behavior:'auto'})}
+ $('#bc').innerHTML=id=='home'?'':`<a data-go="home" tabindex="0">الرئيسية</a> / <b>${TT[id]||''}</b>`;scrollTo({top:0,behavior:'auto'});if(!go.n&&ROUTES.includes(id)&&location.hash!='#'+id){try{history.pushState(null,'','#'+id)}catch(e){}}fbCur=id;fbRender()}
+const ROUTES=['home','about','services','courses','calendar','news','partners','contact','join','portal'];
+let fbCur='home';const FBK='bk_fb';
+function fbRender(){const v=ST.g(FBK,{})[fbCur];$('#fbq').textContent=v===undefined?'هل كانت هذه الصفحة مفيدة؟':(v?'شكرًا لتقييمك، سعدنا بإفادتك.':'شكرًا، سنعمل على تحسين هذه الصفحة.');$('#fbb').style.display=v===undefined?'':'none'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-fb]');if(!b)return;const m=ST.g(FBK,{});if(m[fbCur]!==undefined)return;const h=+b.dataset.fb;m[fbCur]=h;ST.s(FBK,m);fbRender();send('page_feedback',{page:fbCur,helpful:!!h})});
+function hashGo(){const h=decodeURIComponent(location.hash.slice(1));go.n=1;try{go(ROUTES.includes(h)?h:'home')}finally{go.n=0}}
 function t(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(t.x);t.x=setTimeout(()=>e.style.display='none',2800)}
 function f(fm,m){t(m);fm.reset();return false}
-function vf(fm){fm.reset();t('التحقق من الشهادات يتاح بعد ربط المنصة بقاعدة البيانات');return false}
 function show(id){const c=CO.find(x=>x.id==id);go('course');const ps=prv(c);
  $('#cd').innerHTML=`<div class="cgrid"><div class="frame">${poster(c)}</div><div class="info"><div>${bd(c)} <span class="chip">${c.ty}</span></div><h2 style="margin:8px 0;font-size:clamp(22px,4vw,32px)">${X(c.t)}</h2><p style="color:var(--mut)">${X(c.ds||'')}</p>
  <div class="meta"><div><small>الموعد</small>${dtx(c)}</div><div><small>الوقت</small>${c.time||TBD}</div><div><small>عدد الساعات</small>${c.h||TBD}</div><div><small>نمط التقديم</small>${c.m||TBD}</div><div><small>الرسوم</small>${c.p||TBD}</div><div><small>المقاعد المتبقية</small>${c.s!=null?c.s:TBD}</div></div>
@@ -459,7 +464,7 @@ function show(id){const c=CO.find(x=>x.id==id);go('course');const ps=prv(c);
 function cm(fm){const d=$('#dis');if(d.querySelector('p[style]'))d.innerHTML='';d.innerHTML+=`<p>${X(fm.querySelector('input').value)} <b>— أنت</b></p>`;fm.reset();return false}
 function showP(id){const p=PA.find(x=>x.id==id);go('partner');const cs=pub().filter(c=>c.pr.some(i=>i==p.id));
  $('#pd').innerHTML=`<div class="card top" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center"><span class="av big">${I('user',54)}</span><div style="flex:1;min-width:220px"><h2 style="font-size:clamp(22px,4vw,30px)">${X(p.n)}</h2><p style="color:var(--mut);margin:0">${X(p.r)}${p.o?' · '+X(p.o):''}</p></div></div>
- <div class="hd" style="margin-top:24px"><h2>نبذة</h2></div>${p.b?`<div class="card"><p style="font-size:16px;color:var(--ink)">${X(p.b)}</p><p class="src">نبذة مجمّعة من مصادر منشورة علنًا وتخضع لاعتماد بيت الخبرات.</p></div>`:em('النبذة قيد الاعتماد من بيت الخبرات.')}
+ ${p.b?`<div class="hd" style="margin-top:24px"><h2>نبذة</h2></div><div class="card"><p style="font-size:16px;color:var(--ink)">${X(p.b)}</p><p class="src">نبذة مجمّعة من مصادر منشورة علنًا وتخضع لاعتماد بيت الخبرات.</p></div>`:''}
  <div class="hd" style="margin-top:24px"><h2>البرامج</h2></div><div class="grid">${L(cs,mini)||em('لا برامج منشورة.')}</div>`;ic()}
 const tb=(h,r)=>`<table><tr>${L(h,x=>`<th>${x}</th>`)}</tr>${L(r,x=>`<tr>${L(x,y=>`<td>${y}</td>`)}</tr>`)}</table>`;
 const bx=h=>`<div class="card">${h}</div>`;
@@ -511,8 +516,12 @@ document.addEventListener('click',e=>{const g=e.target.closest('[data-go]'),d=e.
  if(cf){CAL.f=cf.dataset.calf;renderCal()}if(v){CAL.v=v.dataset.calv;renderCal()}if(dy){CAL.sel=dy.dataset.day;CAL.v='grid';renderCal()}});
 let FS=1;
 document.addEventListener('keydown',e=>{if(e.key=='Enter'){const x=e.target.closest&&e.target.closest('[data-go],[data-dash],[data-p]');if(x&&x.tagName!='BUTTON')x.click()}});
-function ask(x){const l=$('#bl');l.innerHTML+=`<p class="u">${X(x)}</p>`;const w=x.split(/\s+/).filter(z=>z.length>2);const hit=FAQ.find(a=>a[0]==x)||FAQ.map(a=>[w.filter(z=>a[0].includes(z)).length,a]).filter(r=>r[0]).sort((p,q)=>q[0]-p[0]).map(r=>r[1])[0];l.innerHTML+=`<p>${hit?X(hit[1]):'سيتواصل معك فريقنا عبر ics.hle@iau.edu.sa أو 0560072455.'}</p>`;l.scrollTop=1e5}
-$('#bs').onclick=()=>{const v=$('#bt').value.trim();if(v){ask(v);$('#bt').value=''}};
+const nr=t=>String(t).replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
+const SW=new Set(['بيت','خبرات','قانونيه','قانوني','ماهي','كيف','هل','متى','ماذا','لماذا','عن','على','هذا','هذه','تقدمون','لديكم','عندكم','ابغي','ابي','وش','ايش','شلون','اريد','ممكن','لو','سمحت']);
+const nz=z=>nr(z).replace(/[؟?!،,.:؛«»"]/g,'').replace(/^(وال|بال|لل|ال)/,'');
+const KW=[[/^(?!.*(اليه|طريقه|طرق|تنفيذ)).*خدمات/,'ما خدماتكم؟'],[/من انتم|من نحن|عنكم|نبذه عن/,'من نحن؟'],[/جوال|هاتف|رقم|واتس|ايميل|بريد|تواصل|اتصال/,'وسائل التواصل'],[/سعر|اسعار|رسوم|تكلف|اتعاب|(^|\s)كم(\s|$)/,'ما آلية طلب الاستشارة؟'],[/شريك|شراكه|اشارك/,'هل يمكنني الانضمام كشريك؟'],[/سجل|تسجيل|اشترك|اشتراك/,'كيف أسجل في دورة؟'],[/موقع|عنوان|وين|فين|مكانكم|فرع/,'أين موقعكم؟']];
+function nextC(){const u=pub().filter(c=>c.st!='past');return u.length?'البرامج القادمة:\n'+u.map(c=>'• '+c.t+' — '+(c.dt?dtx(c):'الموعد يُعلن لاحقًا')).join('\n'):'لا توجد برامج قادمة معلنة حاليًا، تابع الدورات والتقويم لإعلان المواعيد.'}
+function ask(x){const l=$('#bl');l.innerHTML+=`<p class="u">${X(x)}</p>`;const nx=nr(x),w=x.split(/\s+/).map(nz).filter(z=>z.length>2&&!SW.has(z));const sc=a=>w.filter(z=>nr(a[0]).includes(z)).length*2+w.filter(z=>nr(a[1]).includes(z)).length;const kw=KW.find(k=>k[0].test(nx));const hit=FAQ.find(a=>a[0]==x)||(kw&&FAQ.find(a=>a[0]==kw[1]))||FAQ.map(a=>[sc(a),a]).filter(r=>r[0]>=2).sort((p,q)=>q[0]-p[0]).map(r=>r[1])[0];let a=hit?hit[1]:'لم أجد إجابة مباشرة لسؤالك، وسيتواصل معك فريقنا عبر ics.hle@iau.edu.sa أو 0560072455.';if(hit&&hit[0]=='متى الدورة القادمة؟')a=nextC();l.innerHTML+=`<p>${X(a)}</p>`;l.scrollTop=1e5} $('#bs').onclick=()=>{const v=$('#bt').value.trim();if(v){ask(v);$('#bt').value=''}};
 $('#bt').onkeydown=e=>{if(e.key=='Enter')$('#bs').click()};
 $('#bb').onclick=()=>$('#bp').classList.toggle('open');
 $('#mb').onclick=()=>$('#mm').classList.toggle('open');
@@ -544,7 +553,6 @@ async function loadWatchSubscriptions(){if(!SUPA.url||!AUTH.t||!ME)return;try{co
 const done=(ref,k,ok)=>`<div class="card top"><h3>${I('inbox',22)} تم استلام ${k}</h3><p>رقم المتابعة: <b dir="ltr">${ref}</b></p><p class="src">${ok===true?'أُرسل إلى فريق بيت الخبرات، ويصل إلى البريد '+SUPA.to:ok===false?'تعذّر الإرسال، حاول لاحقًا أو راسلنا على '+SUPA.to:'وضع المعاينة: حُفظ على جهازك فقط ولم يُرسل بريد فعلي. يُفعَّل الإرسال بعد ربط المنصة بقاعدة البيانات.'}</p></div>`;
 function keep(ref,k,tp,ok){const R=ST.g('bk_r',[]);R.push({ref,k,t:tp,at:Date.now(),ok});ST.s('bk_r',R)}
 async function sendC(fm){const d=Object.fromEntries(new FormData(fm)),ref=mkref(),ok=await send('contact_messages',{ref,name:d.name,phone:d.phone,email:d.email,topic:d.topic,body:d.body});keep(ref,'رسالة',d.topic,ok);$('#ref').innerHTML=done(ref,'رسالتك',ok);ic();fm.reset();return false}
-function track(fm){const v=new FormData(fm).get('n').trim().toUpperCase(),r=ST.g('bk_r',[]).find(x=>x.ref==v);$('#tr').innerHTML=r?`<div class="card top"><p><b dir="ltr">${r.ref}</b> · ${r.k} · ${X(r.t||'')}</p><p>الحالة: تم الاستلام${r.ok===null?' (وضع المعاينة)':''}</p></div>`:em('لا طلب بهذا الرقم على هذا الجهاز.');return false}
 let NT=[{id:'n1',t:'قريبًا: المدخل إلى نظام المعاملات المدنية',x:'يقدمه أ.د. يوسف بن عبدالله الشبيلي، ويُعلن الموعد قريبًا.',a:'all',c:1,at:'2026-10-19'}];
 const rd=()=>ST.g('bk_read',[]);
 function renderNt(){const r=rd(),u=NT.filter(n=>!r.includes(n.id)).length;$('#nbc').textContent=u||'';$('#np').innerHTML=`<div class="nh"><b>الإشعارات</b><span><button class="chip" data-nt="all">تعليم الكل كمقروء</button> <button class="chip" data-nt="perm">تنبيهات المتصفح</button></span></div>`+(L(NT,n=>`<div class="nt${r.includes(n.id)?'':' un'}" data-ntid="${n.id}" tabindex="0"><b>${X(n.t)}</b><p>${X(n.x)}</p><small>${n.at||''}</small></div>`)||em('لا إشعارات.'))}
@@ -554,7 +562,7 @@ function adminReq(){const R=ST.g('bk_r',[]);return R.length?tb(['الرقم','ا
 
 let WZ={s:1,r:'',d:{}};
 function wz(){const s=WZ.s,pr=`<div class="stp">${L(['الصفة','البيانات','التأكيد'],(x,i)=>`<span class="${i+1<=s?'on':''}">${i+1}. ${x}</span>`)}</div>`;let b='';
- if(s==1)b=`<div class="portals">${[['b','مستفيد','أسجّل في الدورات وأتابع شهاداتي','user',''],['p','شريك مقدم برامج','أقدّم دورة أو برنامجًا مع بيت الخبرات','briefcase','n']].map(x=>`<div class="portal ${x[4]}" data-wz="${x[0]}" tabindex="0"><span>${I(x[3],32)}</span><h3>${x[1]}</h3><p>${x[2]}</p></div>`).join('')}</div>`;
+ if(s==1)b=`<div class="portals">${[['b','مستفيد','أسجّل في الدورات وأتابع شهاداتي','user',''],['p','شريك مقدم برامج','أقدّم دورة أو برنامجًا مع بيت الخبرات','briefcase','n lock']].map(x=>`<div class="portal ${x[4]}"${x[4].includes('lock')?' aria-disabled="true"':` data-wz="${x[0]}" tabindex="0"`}><span>${I(x[3],32)}</span><h3>${x[1]}</h3><p>${x[2]}</p>${x[4].includes('lock')?'<em class="soonb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> قريبًا</em>':''}</div>`).join('')}</div>`;
  if(s==2)b=`<form class="card" onsubmit="return wz2(this)"><div class="row"><div><label>الاسم</label><input name="name" required value="${X(WZ.d.name||'')}"></div><div><label>البريد الإلكتروني</label><input name="email" type="email" required value="${X(WZ.d.email||'')}"></div><div><label>الجوال</label><input name="phone" value="${X(WZ.d.phone||'')}"></div></div>${WZ.r=='b'?`<label>اهتماماتك</label><div class="cb">${L(FIELDS,x=>`<label><input type="checkbox" name="f" value="${x[0]}"> ${x[0]}</label>`)}</div>`:`<label>البرنامج المقترح ونبذة عنك</label><textarea name="body" rows="4" required>${X(WZ.d.body||'')}</textarea>`}<p><button type="button" class="btn" data-wz="back">رجوع</button> <button class="btn p">التالي</button></p></form>`;
  if(s==3)b=`<div class="card"><h3>راجع بياناتك</h3><p>الصفة: ${WZ.r=='b'?'مستفيد':'شريك مقدم برامج'}</p><p>الاسم: ${X(WZ.d.name)}</p><p>البريد: ${X(WZ.d.email)}</p>${WZ.d.f?`<p>الاهتمامات: ${X(WZ.d.f)}</p>`:''}${WZ.d.body?`<p>${X(WZ.d.body)}</p>`:''}<p><button class="btn" data-wz="back">رجوع</button> <button class="btn g" data-wz="send">إرسال الطلب</button></p></div>`;
  if(s==4)b=WZ.res;
@@ -615,7 +623,7 @@ const SEED={users:[
  rq:[{id:'BK-20261010-A1B2',u:'u2',pk:'باقة الشركات',f:'الشركات، والقضايا التجارية',o:'شركة المثال',d:'مراجعة عقد توريد وتحديد المخاطر.',st:'reviewing',at:'2026-10-10'}]};
 let AUTH=ST.g('bk_auth',null)||{};
 let DB=SUPA.url?{users:[],en:[],ce:[],rq:[]}:(ST.g('bk_db',null)||JSON.parse(JSON.stringify(SEED))),ME=SUPA.url?(AUTH.id||null):ST.g('bk_me',null);
-const hd=()=>({apikey:SUPA.key,Authorization:'Bearer '+(AUTH.t||SUPA.key),'Content-Type':'application/json',Prefer:'return=representation'});
+const hd=()=>({apikey:SUPA.key,Authorization:'Bearer '+(AUTH.t||SUPA.key),'Content-Type':'application/json',Prefer:'return=minimal'});
 async function refresh(){if(!AUTH.r)return false;const x=await sbAuth('token?grant_type=refresh_token',{refresh_token:AUTH.r});if(!x.ok)return false;AUTH.t=x.d.access_token;AUTH.r=x.d.refresh_token;ST.s('bk_auth',AUTH);return true}
 async function api(m,pa,b){const o=()=>({method:m,headers:hd(),body:b?JSON.stringify(b):undefined});let r=await fetch(SUPA.url+'/rest/v1/'+pa,o());if(r.status==401&&await refresh())r=await fetch(SUPA.url+'/rest/v1/'+pa,o());return r}
 async function send(table,row){if(!SUPA.url)return null;try{return (await api('POST',table,row)).ok}catch(e){return false}}
@@ -707,7 +715,7 @@ document.addEventListener('mouseout',e=>{const a=e.target.closest&&e.target.clos
 let TM=ST.g('bk_team',null)||FD.map(x=>({...x}));const tmSave=()=>ST.s('bk_team',TM);
 const ini=n=>n.replace(/^(د\.|أ\.|م\.)\s*/,'').trim().charAt(0);
 const ph=x=>`<div class="ph2"${x.p?` style="--p:url(${x.p})"`:''}>${x.p?'':`<b>${X(ini(x.n))}</b>`}</div>`;
-function tmHTML(){return L(TM,x=>`<div class="tmc">${ph(x)}<h3>${X(x.n)}</h3><span class="chip">${X(x.r)}</span>${x.b?`<details><summary>السيرة</summary><p>${X(x.b)}</p></details>`:''}</div>`)}
+function tmHTML(m){return L(m?TM.filter(x=>/رئيس/.test(x.r)):TM,x=>`<div class="tmc">${ph(x)}<h3>${X(x.n)}</h3><span class="chip">${X(x.r)}</span>${x.b?`<details><summary>السيرة</summary><p>${X(x.b)}</p></details>`:''}</div>`)}
 const rim=f=>new Promise(r=>{const x=new FileReader();x.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,420/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.82))};i.src=x.result};x.readAsDataURL(f)});
 function admTm(){return `<form class="card" onsubmit="addTm(this);return false"><h3>إضافة عضو إلى إدارة بيت الخبرات</h3><div class="row"><div><label>الاسم</label><input name="n" required></div><div><label>المنصب</label><input name="r" required></div><div><label>الصورة الشخصية</label><input type="file" name="p" accept="image/*" style="display:block"></div></div><label>نبذة (اختياري)</label><textarea name="b" rows="2"></textarea><p><button class="btn p">إضافة</button></p></form><div class="tm" style="margin-top:14px">${L(TM,(x,i)=>`<div class="tmc">${ph(x)}<h3>${X(x.n)}</h3><span class="chip">${X(x.r)}</span><p><label class="btn s">${x.p?'تغيير':'رفع'} الصورة<input type="file" accept="image/*" data-tp="${i}"></label> <button class="btn s" data-td="${i}">حذف</button></p></div>`)}</div>`}
 async function addTm(fm){const d=Object.fromEntries(new FormData(fm));TM.push({n:d.n,r:d.r,b:d.b,p:d.p&&d.p.size?await rim(d.p):''});tmSave();build();rd2();t('أُضيف العضو')}
@@ -718,7 +726,7 @@ async function forgot(){const m=$('#lgm').value.trim();if(!m)return t('اكتب 
 document.addEventListener('click',e=>{const w=e.target.closest('[data-sw]'),y=e.target.closest('[data-eye]');if(w){document.querySelectorAll('.aview').forEach(v=>v.classList.toggle('on',v.id==w.dataset.sw))}if(y){const i=y.parentNode.querySelector('input');i.type=i.type=='password'?'text':'password'}});
 $('#alg').src=document.querySelector('.brand img').src;{const r=ST.g('bk_rem','');if(r){$('#lgm').value=r;$('#rem').checked=true}}
 const _b2=build;build=function(){_b2();stats()};rv();if(SUPA.url&&AUTH.t){ME=AUTH.id;loadDB();loadWatchSubscriptions()}
-build();go('home');if(SUPA.url){load();setInterval(load,60000)}
+build();go.n=1;go('home');go.n=0;if(ROUTES.includes(decodeURIComponent(location.hash.slice(1))))hashGo();addEventListener('popstate',hashGo);addEventListener('hashchange',hashGo);if(SUPA.url){load();setInterval(load,60000)}
 </script>
 </body>
 </html>
