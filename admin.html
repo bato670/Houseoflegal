@@ -469,9 +469,100 @@ function showP(id){const p=PA.find(x=>x.id==id);go('partner');const cs=pub().fil
  <div class="hd" style="margin-top:24px"><h2>البرامج</h2></div><div class="grid">${L(cs,mini)||em('لا برامج منشورة.')}</div>`;ic()}
 const tb=(h,r)=>`<table><tr>${L(h,x=>`<th>${x}</th>`)}</tr>${L(r,x=>`<tr>${L(x,y=>`<td>${y}</td>`)}</tr>`)}</table>`;
 const bx=h=>`<div class="card">${h}</div>`;
-function adminCourses(){return `<form class="card" onsubmit="addC(this);return false"><h3>إضافة دورة أو برنامج</h3><div class="row"><div><label>العنوان</label><input name="t" required></div><div><label>الحالة</label><select name="st"><option value="soon">قريبًا</option><option value="open">التسجيل مفتوح</option><option value="past">انتهى</option></select></div><div><label>النوع</label><select name="ty"><option>دورة</option><option>لقاء</option><option>ورشة</option></select></div><div><label>تاريخ البداية</label><input name="dt" type="date"></div><div><label>تاريخ النهاية</label><input name="dt2" type="date"></div><div><label>الوقت</label><input name="time"></div><div><label>الساعات</label><input name="h" type="number"></div><div><label>المقاعد</label><input name="s" type="number"></div><div><label>نمط التقديم</label><select name="m"><option value="">يُعلن لاحقًا</option><option>حضوري</option><option>عن بعد</option><option>مسجل</option></select></div><div><label>الرسوم</label><select name="p"><option value="">يُعلن لاحقًا</option><option>مجانية</option><option>برسوم</option></select></div><div><label>إعلان البرنامج (صورة كاملة)</label><input type="file" name="img" accept="image/*"></div><div><label>المقدم</label><select name="pr"><option value="">—</option>${L(PA,p=>`<option value="${p.id}">${X(p.n)}</option>`)}</select></div></div><label>الوصف</label><textarea name="ds" rows="2"></textarea><p><button class="btn p">حفظ</button></p></form><div style="margin-top:12px">${tb(['البرنامج','الحالة','النشر',''],CO.map(c=>[X(c.t),STL[c.st],c.pb?'منشور':'مسودة',`<button class="btn s" onclick="tgl('${c.id}')">${c.pb?'إخفاء':'نشر'}</button> <button class="btn s" onclick="del('${c.id}')">حذف</button>`]))}</div>`}
-function tgl(id){const c=CO.find(x=>x.id==id);c.pb=c.pb?0:1;build();dash('admin',AI('إدارة الدورات'))}
-function del(id){CO=CO.filter(x=>x.id!=id);build();dash('admin',AI('إدارة الدورات'))}
+let EDIT_COURSE_ID=null;
+const escVal=v=>String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const splitProviderNames=s=>String(s||'').split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+function modeKey(v){return Object.keys(MODE).find(k=>MODE[k]===v)||''}
+function feeKey(v){return Object.keys(FEE).find(k=>FEE[k]===v)||''}
+function adminCourses(){
+ const c=EDIT_COURSE_ID==null?null:CO.find(x=>String(x.id)===String(EDIT_COURSE_ID));
+ const names=c?prv(c).map(p=>p.n).join('، '):'';
+ const field=(label,name,value='',type='text',extra='')=>`<div><label>${label}</label><input name="${name}" type="${type}" value="${escVal(value)}" ${extra}></div>`;
+ return `<form class="card" id="courseForm" onsubmit="return saveCourse(this)">
+ <h3>${c?'تعديل الدورة أو البرنامج':'إضافة دورة أو برنامج'}</h3>
+ ${c?`<input type="hidden" name="courseId" value="${escVal(c.id)}">`:''}
+ <div class="row">
+ ${field('العنوان','t',c?.t||'','text','required')}
+ <div><label>حالة البرنامج</label><select name="st"><option value="soon"${c?.st==='soon'?' selected':''}>قريبًا</option><option value="open"${c?.st==='open'?' selected':''}>التسجيل مفتوح</option><option value="past"${c?.st==='past'?' selected':''}>انتهى</option></select></div>
+ <div><label>النوع</label><select name="ty">${['دورة','لقاء','ورشة','برنامج'].map(v=>`<option${(c?.ty||'دورة')===v?' selected':''}>${v}</option>`).join('')}</select></div>
+ ${field('تاريخ البداية','dt',c?.dt||'','date')}
+ ${field('تاريخ النهاية','dt2',c?.dt2||'','date')}
+ ${field('الوقت','time',c?.time||'')}
+ ${field('الساعات','h',c?.h??'','number')}
+ ${field('المقاعد','s',c?.s??'','number')}
+ <div><label>نمط التقديم</label><select name="m"><option value="">يُعلن لاحقًا</option>${Object.entries(MODE).map(([k,v])=>`<option value="${k}"${modeKey(c?.m)===k?' selected':''}>${v}</option>`).join('')}</select></div>
+ <div><label>الرسوم</label><select name="p"><option value="">يُعلن لاحقًا</option>${Object.entries(FEE).map(([k,v])=>`<option value="${k}"${feeKey(c?.p)===k?' selected':''}>${v}</option>`).join('')}</select></div>
+ <div><label>صورة الإعلان</label><input type="file" name="img" accept="image/*"><small class="src">${c?.img?'تُحفظ الصورة الحالية إذا لم تختاري صورة جديدة.':'يمكن رفع صورة جديدة.'}</small></div>
+ ${field('أسماء مقدمي الدورة (افصلي بين الأسماء بفاصلة)','providerNames',names)}
+ <div><label>حالة النشر</label><select name="publishStatus"><option value="published"${!c||c.pb?' selected':''}>منشور</option><option value="draft"${c&&!c.pb?' selected':''}>مسودة / مخفي</option></select></div>
+ </div>
+ <label>الوصف</label><textarea name="ds" rows="3">${escVal(c?.ds||'')}</textarea>
+ <p><button class="btn p" type="submit">${c?'حفظ التعديلات':'إضافة الدورة'}</button> ${c?'<button class="btn" type="button" onclick="cancelCourseEdit()">إلغاء التعديل</button>':''}</p>
+ <p class="src">تُحفظ التغييرات في قاعدة بيانات الموقع، وتظهر للزوار عند النشر. تعديل اسم مقدم مرتبط بدورة يحدّث اسمه في بيانات الشركاء أيضًا.</p>
+ </form>
+ <div style="margin-top:18px"><h3>الدورات المنشورة والمسودات</h3>
+ ${CO.length?tb(['البرنامج','مقدمو الدورة','الحالة','النشر','الإجراءات'],CO.map(x=>[X(x.t),X(prv(x).map(p=>p.n).join('، ')||'—'),STL[x.st]||x.st,x.pb?'منشور':'مسودة',`<button class="btn s" data-edit-course="${escVal(x.id)}">تعديل</button> <button class="btn s" data-toggle-course="${escVal(x.id)}">${x.pb?'إخفاء':'نشر'}</button> <button class="btn s" data-delete-course="${escVal(x.id)}">حذف</button>`])):em('لا توجد دورات في قاعدة البيانات حتى الآن.')}
+ </div>`;
+}
+function cancelCourseEdit(){EDIT_COURSE_ID=null;dash('admin',AI('إدارة الدورات'))}
+async function uploadCourseImage(file){
+ if(!file||!file.size)return null;
+ if(!file.type.startsWith('image/'))throw new Error('الملف المختار ليس صورة.');
+ if(file.size>8*1024*1024)throw new Error('حجم الصورة يتجاوز 8 ميغابايت.');
+ const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+ const path=`${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+ const r=await fetch(SUPA.url+'/storage/v1/object/course-images/'+path,{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+(AUTH.t||SUPA.key),'Content-Type':file.type,'x-upsert':'true'},body:file});
+ if(!r.ok)throw new Error('تعذّر رفع الصورة إلى التخزين. تحققي من تشغيل ملف SQL وسياسات التخزين.');
+ return SUPA.url+'/storage/v1/object/public/course-images/'+path;
+}
+async function saveCourse(fm){
+ if(!SUPA.url)return t('قاعدة البيانات غير مضبوطة؛ لم تُحفظ الدورة.');
+ if(!AUTH.t||AUTH.role!=='admin')return t('يلزم تسجيل الدخول بحساب إدارة لحفظ الدورات.');
+ const d=Object.fromEntries(new FormData(fm)),editing=!!d.courseId,old=editing?CO.find(x=>String(x.id)===String(d.courseId)):null;
+ const names=splitProviderNames(d.providerNames),oldIds=old&&Array.isArray(old.pr)?old.pr.slice():[],providerIds=[];
+ try{
+  for(let i=0;i<names.length;i++){
+   const name=names[i],match=PA.find(p=>String(p.n||'').trim().toLocaleLowerCase()===name.toLocaleLowerCase());
+   if(match){providerIds.push(match.id);continue}
+   const oldPartner=oldIds[i]!=null?PA.find(p=>String(p.id)===String(oldIds[i])):null;
+   if(!oldPartner)throw new Error(`المقدم «${name}» غير مسجل في قائمة الشركاء. أضيفيه أولًا من قسم شركاء بيت الخبرات، أو اكتبي الاسم المسجل كما هو.`);
+   const pr=await api('PATCH','partners?id=eq.'+encodeURIComponent(oldPartner.id),{name});
+   if(!pr.ok)throw new Error(`تعذّر تعديل اسم مقدم الدورة «${oldPartner.n}». تحققي من صلاحيات جدول partners.`);
+   providerIds.push(oldPartner.id);
+  }
+  let posterUrl=null;
+  if(d.img&&d.img.size)posterUrl=await uploadCourseImage(d.img);
+  else if(old?.img){const m=String(old.img).match(/^url\((.*)\)$/);if(m&&/^https?:\/\//.test(m[1]))posterUrl=m[1]}
+  const payload={title:d.t,lifecycle:d.st,kind:d.ty||'دورة',starts_at:d.dt||null,ends_on:d.dt2||null,time_text:d.time||null,hours:d.h?Number(d.h):null,seats_total:d.s?Number(d.s):null,mode:d.m||null,fee_type:d.p||null,provider_ids:providerIds,description:d.ds||'',status:d.publishStatus||'published'};
+  if(posterUrl)payload.poster_url=posterUrl;
+  else if(old&&!old.img)payload.poster_url=null;
+  const r=editing?await api('PATCH','courses?id=eq.'+encodeURIComponent(d.courseId),payload):await api('POST','courses',payload);
+  if(!r.ok){let msg='تعذّر حفظ الدورة في قاعدة البيانات.';try{const e=await r.clone().json();if(e.message)msg+=' '+e.message}catch(_){}throw new Error(msg+' تحققي من صلاحيات جدول courses وأسماء أعمدته.')}
+  EDIT_COURSE_ID=null;await load();dash('admin',AI('إدارة الدورات'));t(editing?'حُفظت تعديلات الدورة في قاعدة البيانات':'أُضيفت الدورة إلى قاعدة البيانات');
+ }catch(e){t(e.message||'تعذّر حفظ الدورة.');}
+ return false;
+}
+async function toggleCourse(id){
+ if(!AUTH.t||AUTH.role!=='admin')return t('يلزم حساب إدارة.');
+ const c=CO.find(x=>String(x.id)===String(id));if(!c)return;
+ const r=await api('PATCH','courses?id=eq.'+encodeURIComponent(id),{status:c.pb?'draft':'published'});
+ if(!r.ok)return t('تعذّر تغيير حالة النشر؛ تحققي من صلاحيات قاعدة البيانات.');
+ await load();dash('admin',AI('إدارة الدورات'));t(c.pb?'أُخفيت الدورة':'نُشرت الدورة');
+}
+async function deleteCourse(id){
+ const c=CO.find(x=>String(x.id)===String(id));if(!c||!confirm(`هل أنتِ متأكدة من حذف «${c.t}» نهائيًا؟`))return;
+ if(!AUTH.t||AUTH.role!=='admin')return t('يلزم حساب إدارة.');
+ const r=await api('DELETE','courses?id=eq.'+encodeURIComponent(id));
+ if(!r.ok)return t('تعذّر حذف الدورة. قد تكون مرتبطة بتسجيلات أو شهادات؛ يمكنك إخفاؤها بدلًا من حذفها.');
+ if(String(EDIT_COURSE_ID)===String(id))EDIT_COURSE_ID=null;
+ await load();dash('admin',AI('إدارة الدورات'));t('حُذفت الدورة من قاعدة البيانات');
+}
+document.addEventListener('click',e=>{
+ const ed=e.target.closest('[data-edit-course]'),tg=e.target.closest('[data-toggle-course]'),dl=e.target.closest('[data-delete-course]');
+ if(ed){EDIT_COURSE_ID=ed.dataset.editCourse;dash('admin',AI('إدارة الدورات'))}
+ if(tg)toggleCourse(tg.dataset.toggleCourse);
+ if(dl)deleteCourse(dl.dataset.deleteCourse);
+});
 function adminPartners(){return `<form class="card" onsubmit="return addP(this)"><h3>إضافة شريك (مقدم برامج)</h3><div class="row"><div><label>الاسم</label><input name="n" required></div><div><label>الصفة</label><input name="r" required></div><div><label>الجهة</label><input name="o"></div></div><label>النبذة</label><textarea name="b" rows="3"></textarea><p><button class="btn p">إضافة</button></p></form><div style="margin-top:12px">${tb(['الاسم','الصفة','النبذة',''],PA.map(p=>[X(p.n),X(p.r),p.b?'معتمدة':'قيد الاعتماد',`<button class="btn s" onclick="delP('${p.id}')">حذف</button>`]))}</div>`}
 function addP(fm){const d=Object.fromEntries(new FormData(fm));PA.push({id:Date.now(),n:d.n,r:d.r,o:d.o,b:d.b,pend:d.b?0:1});build();dash('admin',AI('شركاء بيت الخبرات'));t('أُضيف الشريك');return false}
 function delP(id){PA=PA.filter(x=>x.id!=id);build();dash('admin',AI('شركاء بيت الخبرات'))}
@@ -583,11 +674,11 @@ function extras(){finder();
 async function share(){try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);t('نُسخ الرابط')}}catch(e){t('تعذّرت المشاركة')}}
 function icsx(){const E=evs();if(!E.length)return t('لا فعاليات بتواريخ محددة');const z=s=>s.replace(/-/g,''),nx=s=>new Date(Date.parse(s)+864e5).toISOString().slice(0,10).replace(/-/g,'');const b=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Bayt Al-Khibrat//AR',...E.flatMap(e=>['BEGIN:VEVENT','UID:'+e.id+'@bayt','SUMMARY:'+e.t,'DTSTART;VALUE=DATE:'+z(e.dt),'DTEND;VALUE=DATE:'+nx(e.dt2),'END:VEVENT']),'END:VCALENDAR'].join('\r\n');try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([b],{type:'text/calendar'}));a.download='bayt-calendar.ics';a.click()}catch(e){t('التصدير متاح من نسخة الملف المحمّلة')}}
 const FEE={free:'مجانية',paid:'برسوم'},MODE={onsite:'حضوري',remote:'عن بعد',recorded:'مسجل'};
-async function load(){if(!SUPA.url)return;try{const [c,p,q,a,n]=await Promise.all([get('courses?status=eq.published&order=starts_at'),get('partners?status=eq.published'),get('chatbot_faq?active=eq.true&order=sort'),get('alerts?active=eq.true'),get('notifications?audience=eq.all&order=created_at.desc')]);
+async function load(){if(!SUPA.url)return;try{const courseQuery=AUTH.t&&AUTH.role==='admin'?'courses?select=*&order=starts_at':'courses?status=eq.published&order=starts_at';const [c,p,q,a,n]=await Promise.all([get(courseQuery),get('partners?status=eq.published'),get('chatbot_faq?active=eq.true&order=sort'),get('alerts?active=eq.true'),get('notifications?audience=eq.all&order=created_at.desc')]);
  if(p.length)PA=p.map(x=>({id:x.id,n:x.name,r:x.role||'',o:x.org||'',b:x.bio||'',pend:!x.bio}));
- if(c.length)CO=c.map(x=>({id:x.id,t:x.title,st:x.lifecycle||'soon',ty:x.kind||'دورة',dt:x.starts_at?x.starts_at.slice(0,10):'',dt2:x.ends_on||'',time:x.time_text,h:x.hours,s:x.seats_total,m:MODE[x.mode]||'',p:FEE[x.fee_type]||'',pr:x.provider_ids||[],ds:x.description,img:x.poster_url?`url(${x.poster_url})`:null,pb:1}));
+ if(c.length|| (AUTH.t&&AUTH.role==='admin'))CO=c.map(x=>({id:x.id,t:x.title,st:x.lifecycle||'soon',ty:x.kind||'دورة',dt:x.starts_at?x.starts_at.slice(0,10):'',dt2:x.ends_on||'',time:x.time_text||'',h:x.hours,s:x.seats_total,m:MODE[x.mode]||'',p:FEE[x.fee_type]||'',pr:x.provider_ids||[],ds:x.description||'',img:x.poster_url?`url(${x.poster_url})`:(CO.find(z=>String(z.id)===String(x.id))||{}).img||null,pb:x.status==='published'?1:0}));
  if(q.length)FAQ=q.map(x=>[x.question,x.answer]);AL=a.map(x=>x.message).filter(Boolean);
- if(n.length)NT=n.map(x=>({id:x.id,t:x.title,x:x.body,a:x.audience,at:(x.created_at||'').slice(0,10)}));build()}catch(e){}}
+ if(n.length)NT=n.map(x=>({id:x.id,t:x.title,x:x.body,a:x.audience,at:(x.created_at||'').slice(0,10)}));build()}catch(e){console.warn('تعذر تحميل محتوى Supabase',e);if(AUTH.t&&AUTH.role==='admin')t('تعذّر تحميل الدورات من قاعدة البيانات؛ تحققي من الصلاحيات.')}}
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s);
  const fa=q('[data-fa]'),rq=q('[data-req]'),pf=q('[data-pf]'),nf=q('[data-nf]'),w=q('[data-w]'),wx=q('[data-wz]'),ix=q('[data-ics]'),sh=q('[data-sh]'),nt=q('[data-nt]'),ni=q('[data-ntid]'),nb=q('#nb');
  if(fa){FA=FA==fa.dataset.fa?'':fa.dataset.fa;finder()}
@@ -632,7 +723,7 @@ async function api(m,pa,b){const o=()=>({method:m,headers:hd(),body:b?JSON.strin
 async function send(table,row){if(!SUPA.url)return null;try{return (await api('POST',table,row)).ok}catch(e){return false}}
 async function get(q){const r=await api('GET',q);if(!r.ok)throw 0;return r.json()}
 async function sbAuth(path,body){const r=await fetch(SUPA.url+'/auth/v1/'+path,{method:'POST',headers:{apikey:SUPA.key,'Content-Type':'application/json'},body:JSON.stringify(body)});return {ok:r.ok,d:await r.json().catch(()=>({}))}}
-async function setSess(d){AUTH={t:d.access_token,r:d.refresh_token,id:d.user.id};ME=AUTH.id;const p=await get('profiles?id=eq.'+AUTH.id).catch(()=>[]);AUTH.role=p[0]?p[0].role:'individual';ST.s('bk_auth',AUTH);await loadDB();await loadWatchSubscriptions();build()}
+async function setSess(d){AUTH={t:d.access_token,r:d.refresh_token,id:d.user.id};ME=AUTH.id;const p=await get('profiles?id=eq.'+AUTH.id).catch(()=>[]);AUTH.role=p[0]?p[0].role:'individual';ST.s('bk_auth',AUTH);await loadDB();await load();await loadWatchSubscriptions();build()}
 async function loadDB(){try{const [p,e,c,r]=await Promise.all([get('profiles?select=*'),get('enrollments?select=*&order=created_at'),get('certificates?select=*'),get('consultation_requests?select=*&order=created_at.desc')]),d10=x=>(x||'').slice(0,10);
  DB={users:p.map(x=>({id:x.id,name:x.full_name||x.email||'—',email:x.email||'',phone:x.phone,org:x.org_name,at:d10(x.created_at),f:x.interests||[],role:x.role})),en:e.map(x=>({id:x.id,u:x.user_id,c:x.course_id,st:x.status,at:d10(x.created_at)})),ce:c.map(x=>({s:x.serial,u:x.user_id,c:x.course_id,at:d10(x.issued_at)})),rq:r.map(x=>({id:x.id,ref:x.ref||x.id.slice(0,8).toUpperCase(),u:x.user_id,pk:x.package_name||'',f:x.field||'',o:x.org_name,d:x.details,st:x.status,at:d10(x.created_at)}))};build()}catch(e){t('تعذّر تحميل البيانات من القاعدة')}}
 async function upd(tbl,id,body,loc){if(SUPA.url){const r=await api('PATCH',tbl+'?id=eq.'+id,body);if(!r.ok)return t('تعذّر الحفظ، تحقق من الصلاحيات');await loadDB()}else{loc();sv()}rd2()}
@@ -694,7 +785,7 @@ const nEn=u=>DB.en.filter(e=>e.u==u.id&&e.st!='cancelled').length;
 function sbt(){const r=subs();return r.length?tb(['الاسم','البريد','الجوال','الجهة','البرامج','الانضمام',''],r.map(u=>[X(u.name),X(u.email),X(u.phone||'—'),X(u.org||'—'),nEn(u),fd(u.at),`<button class="btn s" data-ux="${u.id}">حذف</button>`])):em('لا مشتركين مطابقين.')}
 function admOv(){const E=DB.en.filter(e=>e.st!='cancelled'),mx=Math.max(1,...pub().map(c=>E.filter(e=>e.c==c.id).length));
  return kp([[DB.users.length,'مشتركون','users'],[E.length,'تسجيلات نشطة','book'],[DB.en.filter(e=>e.st=='completed').length,'مكتملون','check'],[DB.ce.length,'شهادات صادرة','award'],[DB.rq.filter(r=>r.st=='new').length,'طلبات جديدة','inbox'],[pub().length,'برامج منشورة','calendar']])
- +`<div class="card top"><h3>التسجيلات حسب البرنامج</h3>${L(pub(),c=>{const n=E.filter(e=>e.c==c.id).length;return `<p style="margin:8px 0 2px">${X(c.t)} <b>${n}</b></p><div class="bar2"><i style="width:${n/mx*100}%"></i></div>`})}</div><div class="card" style="margin-top:12px"><h3>آخر النشاطات</h3>${L(DB.en.slice(-5).reverse(),e=>`<p>${I('user',14)} ${X(UU(e.u).name)} — ${X(CC(e.c).t)} <span class="chip">${ES[e.st]}</span></p>`)||'<p>لا نشاط.</p>'}</div><p class="note">البيانات تجريبية ومحفوظة على هذا الجهاز، وتُستبدل ببيانات Supabase بعد الربط.</p>`}
+ +`<div class="card top"><h3>التسجيلات حسب البرنامج</h3>${L(pub(),c=>{const n=E.filter(e=>e.c==c.id).length;return `<p style="margin:8px 0 2px">${X(c.t)} <b>${n}</b></p><div class="bar2"><i style="width:${n/mx*100}%"></i></div>`})}</div><div class="card" style="margin-top:12px"><h3>آخر النشاطات</h3>${L(DB.en.slice(-5).reverse(),e=>`<p>${I('user',14)} ${X(UU(e.u).name)} — ${X(CC(e.c).t)} <span class="chip">${ES[e.st]}</span></p>`)||'<p>لا نشاط.</p>'}</div><p class="note">${SUPA.url?'اتصال Supabase مفعّل في هذه النسخة؛ تأكدي من نجاح تسجيل الدخول بحساب مدير ومن تحميل البيانات قبل إجراء التعديلات.':'البيانات تجريبية ومحفوظة على هذا الجهاز، وتُستبدل ببيانات Supabase بعد الربط.'}</p>`}
 function admSub(){return `<div class="tools"><input id="sq" placeholder="ابحث بالاسم أو البريد" value="${XA(SQ)}" style="max-width:240px"><select id="sc" style="max-width:240px"><option value="">كل البرامج</option>${L(CO,c=>`<option value="${c.id}"${SC==c.id?' selected':''}>${X(c.t)}</option>`)}</select><span style="flex:1"></span><button class="btn s" data-csv="1">${I('dl',14)} تصدير CSV</button></div><div id="sbt">${sbt()}</div><form class="card" style="margin-top:12px" onsubmit="return addU(this)"><h3>إضافة مشترك</h3><div class="row"><div><label>الاسم</label><input name="name" required></div><div><label>البريد</label><input name="email" type="email" required></div><div><label>الجوال</label><input name="phone"></div></div><p><button class="btn p">إضافة</button></p></form>`}
 function addU(fm){if(SUPA.url){t('المشتركون ينشئون حساباتهم بأنفسهم من صفحة الدخول');return false}const d=Object.fromEntries(new FormData(fm));DB.users.push({id:uid(),name:d.name,email:d.email,phone:d.phone,org:'',at:today(),f:[]});sv();rd2();t('أُضيف المشترك');return false}
 async function issue(id){const z=DB.en.find(x=>x.id==id),sn='BK-C-'+N0.getFullYear()+'-'+String(DB.ce.length+1).padStart(4,'0');
