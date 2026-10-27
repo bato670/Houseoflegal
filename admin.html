@@ -482,7 +482,7 @@ function addA(fm){AL=[new FormData(fm).get('a')];build();dash('admin',AI('الت
 const DASH={
  me:{n:'لوحة الفرد',p:[['دوراتي',()=>em('لا دورات مسجلة بعد.','<p><button class="btn p" data-go="courses">استعرض الدورات</button></p>')],['شهاداتي',()=>em('ستظهر هنا شهادات الدورات المكتملة.')],['طلبات الاستشارة',()=>em('لا طلبات بعد.','<p><button class="btn p" data-go="contact">اطلب استشارة</button></p>')],['التذكيرات',()=>em('لا تذكيرات حاليًا.')],['اهتماماتي',()=>`<form class="card"><div class="cb">${L(FIELDS,x=>`<label><input type="checkbox"> ${x[0]}</label>`)}</div><p><button class="btn p" type="button" onclick="t('تُحفظ بعد ربط قاعدة البيانات')">حفظ</button></p></form>`],['ملفي',()=>'<form class="card"><label>الاسم</label><input><label>البريد</label><input type="email"></form>']]},
  partner:{n:'لوحة الشريك',p:[['برامجي',()=>em('تظهر هنا البرامج المرتبطة بحسابك كمقدم.')],['ملفي ونبذتي',()=>'<form class="card"><label>الاسم</label><input><label>الصفة</label><input><label>النبذة</label><textarea rows="4"></textarea><p><button class="btn p" type="button" onclick="t(\'تُرسل للاعتماد من بيت الخبرات\')">إرسال للاعتماد</button></p></form>'],['المرفقات',()=>em('ارفع مواد البرنامج ليعتمدها بيت الخبرات.')],['التقييمات',()=>em('تظهر التقييمات بعد انعقاد البرامج.')]]},
- admin:{n:'لوحة الإدارة',p:[['إدارة الدورات',adminCourses],['شركاء بيت الخبرات',adminPartners],['مركز الشهادات',()=>em('إصدار شهادات المتدربين بعد اكتمال البرنامج.')],['متابعة التذكيرات',()=>em('تذكيرات المتدربين والمقدمين والمواعيد.')],['معاينة قبل النشر',()=>`<div class="grid">${L(CO.filter(c=>!c.pb),mini)||em('لا مسودات حاليًا.')}</div>`],['الشات بوت',adminBot],['التنبيهات المؤقتة',adminAl],['الطلبات',()=>em('لا طلبات واردة.')]]}};
+ admin:{n:'لوحة الإدارة',p:[['إدارة الدورات',adminCourses],['شركاء بيت الخبرات',adminPartners],['مركز الشهادات',()=>em('إصدار شهادات المتدربين بعد اكتمال البرنامج.')],['متابعة التذكيرات',adminReminders],['معاينة قبل النشر',()=>`<div class="grid">${L(CO.filter(c=>!c.pb),mini)||em('لا مسودات حاليًا.')}</div>`],['الشات بوت',adminBot],['التنبيهات المؤقتة',adminAl],['الطلبات',()=>em('لا طلبات واردة.')]]}};
 function dash(k,i=0){const d=DASH[k];go('dash');document.querySelectorAll('nav a,.mm a').forEach(a=>a.classList.remove('on'));
  $('#ds').innerHTML=L(d.p,(x,j)=>`<button class="${j==i?'on':''}" data-d="${k}" data-i="${j}">${x[0]}</button>`);
  $('#dc').innerHTML=`<div class="hd"><h2>${d.n}</h2></div><h3 style="margin-bottom:10px">${d.p[i][0]}</h3>${d.p[i][1]()}`;ic()}
@@ -538,14 +538,16 @@ const SUPA={url:'https://hwhggihcugnrdwhcuqkr.supabase.co',key:'eyJhbGciOiJIUzI1
 const ST={g(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const mkref=()=>'BK-'+N0.toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
 const isW=id=>ST.g('bk_w',[]).includes(String(id));
+// Returns an explicit start timestamp only when the course date is actually published.
+function courseStartAt(c){if(!c||!c.dt)return null;const m=String(c.time||'').match(/(\d{1,2}):(\d{2})\s*(صباحًا|مساءً|ص|م)?/);let hh=m?+m[1]:9,mm=m?+m[2]:0,amp=m?m[3]:'';if(!amp&&/مساءً|مساء/.test(String(c.time||'')))amp='مساءً';if(!amp&&/صباحًا|صباح/.test(String(c.time||'')))amp='صباحًا';if(amp==='مساءً'||amp==='م')if(hh<12)hh+=12;if((amp==='صباحًا'||amp==='ص')&&hh===12)hh=0;const d=new Date(`${c.dt}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00+03:00`);return Number.isNaN(d.getTime())?null:d.toISOString()}
 async function watch(id){
  id=String(id);let w=ST.g('bk_w',[]),exists=w.includes(id);
  if(SUPA.url){
   if(!AUTH.t||!ME){t('لتفعيل التنبيه بالبريد، سجّل الدخول أولًا');go('portal');return}
   try{
    if(exists){const r=await api('DELETE','course_reminder_subscriptions?course_id=eq.'+encodeURIComponent(id)+'&user_id=eq.'+encodeURIComponent(ME));if(!r.ok)return t('تعذّر إلغاء التنبيه، حاول لاحقًا');w=w.filter(x=>x!==id)}
-   else{const r=await api('POST','course_reminder_subscriptions',{course_id:id});if(!r.ok)return t('تعذّر تفعيل التنبيه، تحقق من إعداد قاعدة البيانات');w=[...w,id]}
-   ST.s('bk_w',w);t(exists?'أُلغي التنبيه':'فُعّل التنبيه، وسنرسل رسالة عند إعلان الموعد');build();return
+   else{const c=CC(id);const startAt=courseStartAt(c);const r=await api('POST','course_reminder_subscriptions',{user_id:ME,course_id:id,course_title:c.t,course_start_at:startAt,reminder_email:UU(ME).email||null});if(!r.ok)return t('تعذّر تفعيل التنبيه، تحقق من تطبيق ترحيل قاعدة البيانات');w=[...w,id]}
+   ST.s('bk_w',w);t(exists?'أُلغي التنبيه':(courseStartAt(CC(id))?'سُجّل التنبيه؛ تُرسل الرسائل بعد تفعيل خدمة التذكير على الخادم':'سُجّل اهتمامك؛ حدّد موعد البرنامج أولًا لتفعيل التذكيرات الزمنية'));build();return
   }catch(e){return t('تعذّر حفظ التنبيه، حاول لاحقًا')}
  }
  w=exists?w.filter(x=>x!==id):[...w,id];ST.s('bk_w',w);t(w.includes(id)?'حُفظ التنبيه في وضع المعاينة على هذا الجهاز':'أُلغي التنبيه');build()
@@ -675,6 +677,17 @@ DASH.me={n:'لوحة الفرد المشترك',p:[['نظرة عامة',()=>{con
  return `<div class="card top"><h3>أهلًا ${X(u.name)}</h3><p>${X(u.email)} · عضو منذ ${fd(u.at)}</p><div class="bar2"><i style="width:${pc}%"></i></div><p class="src">نسبة إتمام برامجك: ${pc}%</p></div>`+kp([[m.length,'برامج مسجلة','book'],[dn,'برامج مكتملة','check'],[DB.ce.filter(x=>x.u==ME).length,'شهادات','award'],[DB.rq.filter(r=>r.u==ME).length,'طلبات استشارة','file']])+`<p><button class="btn p" data-go="courses">استعرض البرامج</button> <button class="btn" data-go="calendar">التقويم</button></p>`}],
  ['دوراتي',myC],['شهاداتي',myCert],['طلبات الاستشارة',myRq],['التذكيرات',myRem],['ملفي واهتماماتي',myProf],['الإشعارات',()=>`<div class="grid">${L(NT,n=>`<div class="card"><b>${X(n.t)}</b><p>${X(n.x)}</p><small>${n.at||''}</small></div>`)}</div>`]]};
 /* لوحة الإدارة */
+function adminReminders(){
+ if(!SUPA.url)return em('معاينة فقط: يلزم ربط Supabase لتظهر الاشتراكات الفعلية.');
+ setTimeout(loadAdminReminders,0);
+ return `<div class="card top"><h3>متابعة تذكيرات البرامج</h3><p>التذكيرات المجدولة: قبل البرنامج بـ24 ساعة وقبل بدايته بـ5 دقائق. أدخلي الموعد الفعلي للبرامج التي لم يعلن موعدها؛ وتُرسل الرسائل بعد نشر وظيفة الخادم وضبط أسرار البريد والجدولة.</p><button class="btn s" onclick="loadAdminReminders()">تحديث الحالة</button></div><div id="admin-reminder-content" class="card">جارٍ تحميل الاشتراكات…</div>`;
+}
+async function loadAdminReminders(){
+ const target=document.querySelector('#admin-reminder-content');if(!target)return;
+ try{const rows=await get('course_reminder_subscriptions?select=id,user_id,course_id,course_title,course_start_at,reminder_24h_sent_at,reminder_5m_sent_at,created_at&order=created_at.desc');
+ target.innerHTML=rows.length?tb(['المشترك','البرنامج','الموعد وتحديثه','تذكير 24 ساعة','تذكير 5 دقائق'],rows.map(r=>[X(DB.users.find(u=>u.id==r.user_id)?.name||r.user_id),X(r.course_title||CC(r.course_id).t),`<form onsubmit="return saveReminderDate(this)"><input type="hidden" name="id" value="${XA(r.id)}"><input type="datetime-local" name="start" required value="${r.course_start_at?new Date(new Date(r.course_start_at).getTime()-new Date(r.course_start_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}" style="min-width:190px"><button class="btn s" type="submit">حفظ الموعد</button></form>`,r.reminder_24h_sent_at?'أُرسل':'بانتظار الإرسال',r.reminder_5m_sent_at?'أُرسل':'بانتظار الإرسال'])):em('لا توجد اشتراكات تذكير بعد.');
+ }catch(e){target.innerHTML=em('تعذّر قراءة الاشتراكات. تأكدي من تطبيق ملف SQL المرفق وسياسات RLS قبل إعادة المحاولة.')}}
+async function saveReminderDate(fm){if(!SUPA.url||AUTH.role!=='admin')return t('هذه العملية متاحة للإدارة فقط'),false;const d=Object.fromEntries(new FormData(fm));const date=new Date(d.start);if(!d.id||Number.isNaN(date.getTime()))return t('أدخلي موعدًا صحيحًا'),false;const r=await api('PATCH','course_reminder_subscriptions?id=eq.'+encodeURIComponent(d.id),{course_start_at:date.toISOString(),reminder_24h_sent_at:null,reminder_5m_sent_at:null,reminder_24h_claimed_at:null,reminder_5m_claimed_at:null});if(!r.ok)return t('تعذّر حفظ الموعد؛ تحققي من صلاحيات قاعدة البيانات'),false;t('حُفظ الموعد وأُعيد ضبط حالة التذكيرات');await loadAdminReminders();return false}
 let SQ='',SC='';
 const subs=()=>DB.users.filter(u=>(!SQ||(u.name+u.email).includes(SQ))&&(!SC||DB.en.some(e=>e.u==u.id&&e.c==SC&&e.st!='cancelled')));
 const nEn=u=>DB.en.filter(e=>e.u==u.id&&e.st!='cancelled').length;
@@ -694,7 +707,7 @@ function admRq(){return (DB.rq.length?tb(['الرقم','مقدّم الطلب','
 async function addC(fm){const d=Object.fromEntries(new FormData(fm)),f=d.img,o={id:Date.now(),t:d.t,st:d.st,ty:d.ty,dt:d.dt||'',dt2:d.dt2||'',time:d.time,h:d.h||'',s:d.s===''?null:+d.s,m:d.m,p:d.p,pr:d.pr?[d.pr]:[],ds:d.ds,pb:1};
  if(f&&f.size){const u=await new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f)}),im=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=u});o.img=`url(${u})`;o.ar=im.naturalWidth+'/'+im.naturalHeight}
  CO.push(o);build();dash('admin',AI('إدارة الدورات'));t('حُفظ البرنامج');return false}
-DASH.admin={n:'لوحة الإدارة',p:[['نظرة عامة',admOv],['إدارة الدورات',adminCourses],['المشتركون',admSub],['التسجيلات والشهادات',admEn],['طلبات الاستشارة والرسائل',admRq],['فريق الإدارة',admTm],['شركاء بيت الخبرات',adminPartners],['متابعة التذكيرات',()=>em('تذكيرات المتدربين والمقدمين والمواعيد.')],['معاينة قبل النشر',()=>`<div class="grid">${L(CO.filter(c=>!c.pb),mini)||em('لا مسودات حاليًا.')}</div>`],['الشات بوت',adminBot],['التنبيهات المؤقتة',adminAl],['الإشعارات',adminNt]]};
+DASH.admin={n:'لوحة الإدارة',p:[['نظرة عامة',admOv],['إدارة الدورات',adminCourses],['المشتركون',admSub],['التسجيلات والشهادات',admEn],['طلبات الاستشارة والرسائل',admRq],['فريق الإدارة',admTm],['شركاء بيت الخبرات',adminPartners],['متابعة التذكيرات',adminReminders],['معاينة قبل النشر',()=>`<div class="grid">${L(CO.filter(c=>!c.pb),mini)||em('لا مسودات حاليًا.')}</div>`],['الشات بوت',adminBot],['التنبيهات المؤقتة',adminAl],['الإشعارات',adminNt]]};
 let CUR={k:'me',i:0};const rd2=()=>dash(CUR.k,CUR.i),AI=n=>DASH.admin.p.findIndex(x=>x[0]==n);
 const _dash=dash;dash=function(k,i=0){if(SUPA.url){const ok=k=='me'?AUTH.t:k=='admin'?AUTH.role=='admin':AUTH.t&&AUTH.role!='individual';if(!ok){t(AUTH.t?'ليست لديك صلاحية لهذه اللوحة':'سجّل الدخول أولًا');return go('portal')}}else if(k=='me'&&!ME)loginAs('u1');CUR={k,i};_dash(k,i);$('#ds').innerHTML+='<button data-out="1">'+I('out',16)+' خروج</button>'};
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),A=q('[data-lb]'),ec=q('[data-ec]'),pc=q('[data-pc]'),wr=q('[data-wr]'),ux=q('[data-ux]'),ci=q('[data-ic]'),cv=q('[data-csv]'),ou=q('[data-out]');
