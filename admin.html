@@ -483,7 +483,7 @@ function adminCourses(){
  const c=EDIT_COURSE_ID==null?null:CO.find(x=>String(x.id)===String(EDIT_COURSE_ID));
  const names=c?prv(c).map(p=>p.n).join('، '):'';
  const field=(label,name,value='',type='text',extra='')=>`<div><label>${label}</label><input name="${name}" type="${type}" value="${escVal(value)}" ${extra}></div>`;
- return `<form class="card" id="courseForm" onsubmit="return saveCourse(this)">
+ return `<form class="card" id="courseForm" onsubmit="saveCourse(event,this); return false">
  <h3>${c?'تعديل الدورة أو البرنامج':'إضافة دورة أو برنامج'}</h3>
  ${c?`<input type="hidden" name="courseId" value="${escVal(c.id)}">`:''}
  <div class="row">
@@ -520,9 +520,15 @@ async function uploadCourseImage(file){
  if(!r.ok)throw new Error('تعذّر رفع الصورة إلى التخزين. تحققي من تشغيل ملف SQL وسياسات التخزين.');
  return SUPA.url+'/storage/v1/object/public/course-images/'+path;
 }
-async function saveCourse(fm){
- if(!SUPA.url)return t('قاعدة البيانات غير مضبوطة؛ لم تُحفظ الدورة.');
- if(!AUTH.t||AUTH.role!=='admin')return t('يلزم تسجيل الدخول بحساب إدارة لحفظ الدورات.');
+async function saveCourse(event,fm){
+ if(event&&typeof event.preventDefault==='function')event.preventDefault();
+ if(!fm)return false;
+ if(!SUPA.url){t('قاعدة البيانات غير مضبوطة؛ لم تُحفظ الدورة.');return false}
+ if(!AUTH.t||AUTH.role!=='admin'){t('يلزم تسجيل الدخول بحساب إدارة لحفظ الدورات.');return false}
+ const submitBtn=fm.querySelector('button[type=submit]');
+ if(submitBtn&&submitBtn.disabled)return false;
+ const originalText=submitBtn?submitBtn.textContent:'';
+ if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='جارٍ حفظ الدورة…'}
  const d=Object.fromEntries(new FormData(fm)),editing=!!d.courseId,old=editing?CO.find(x=>String(x.id)===String(d.courseId)):null;
  const names=splitProviderNames(d.providerNames),oldIds=old&&Array.isArray(old.pr)?old.pr.slice():[],providerIds=[];
  try{
@@ -542,9 +548,10 @@ async function saveCourse(fm){
   if(posterUrl)payload.poster_url=posterUrl;
   else if(old&&!old.img)payload.poster_url=null;
   const r=editing?await api('PATCH','courses?id=eq.'+encodeURIComponent(d.courseId),payload):await api('POST','courses',payload);
-  if(!r.ok){let msg='تعذّر حفظ الدورة في قاعدة البيانات.';try{const e=await r.clone().json();if(e.message)msg+=' '+e.message}catch(_){}throw new Error(msg+' تحققي من صلاحيات جدول courses وأسماء أعمدته.')}
+  if(!r.ok){let msg='تعذّر حفظ الدورة في قاعدة البيانات (HTTP '+r.status+').';try{const e=await r.clone().json();if(e.message)msg+=' '+e.message;if(e.details)msg+=' — '+e.details;if(e.hint)msg+=' — '+e.hint}catch(_){}throw new Error(msg+' تحققي من صلاحيات جدول courses وأسماء أعمدته.')}
   EDIT_COURSE_ID=null;await load();dash('admin',AI('إدارة الدورات'));t(editing?'حُفظت تعديلات الدورة في قاعدة البيانات':'أُضيفت الدورة إلى قاعدة البيانات');
- }catch(e){t(e.message||'تعذّر حفظ الدورة.');}
+ }catch(e){console.error('saveCourse failed:',e);t(e.message||'تعذّر حفظ الدورة.');}
+ finally{if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=originalText}}
  return false;
 }
 async function toggleCourse(id){
@@ -812,15 +819,26 @@ DASH.me={n:'لوحة الفرد المشترك',p:[['نظرة عامة',()=>{con
 /* لوحة الإدارة */
 function adminReminders(){
  if(!SUPA.url)return em('معاينة فقط: يلزم ربط Supabase لتظهر الاشتراكات الفعلية.');
- setTimeout(loadAdminReminders,0);
- return `<div class="card top"><h3>متابعة تذكيرات البرامج</h3><p>التذكيرات المجدولة: قبل البرنامج بـ24 ساعة وقبل بدايته بـ5 دقائق. أدخلي الموعد الفعلي للبرامج التي لم يعلن موعدها؛ وتُرسل الرسائل بعد نشر وظيفة الخادم وضبط أسرار البريد والجدولة.</p><button class="btn s" onclick="loadAdminReminders()">تحديث الحالة</button></div><div id="admin-reminder-content" class="card">جارٍ تحميل الاشتراكات…</div>`;
+ setTimeout(()=>{loadReminderSettings();loadAdminReminders()},0);
+ return `<div class="card top"><h3>إعدادات التذكيرات الآلية</h3><p>تُرسل الرسائل قبل الدورة بـ24 ساعة وقبل بدايتها بـ5 دقائق. عدّلي العنوان والنص أدناه. المتغيرات المتاحة: <code>{{course_title}}</code> اسم الدورة، <code>{{start_time}}</code> موعدها، <code>{{name}}</code> اسم المستفيد. يلزم إعداد وظيفة الخادم وResend والجدولة مرة واحدة حتى يتم الإرسال الفعلي.</p><form id="reminder-settings-form" onsubmit="saveReminderSettings(event,this);return false"><label>عنوان رسالة تذكير 24 ساعة</label><input name="subject24" required maxlength="180" value="تذكير: موعد {{course_title}} قريب"><label>نص رسالة تذكير 24 ساعة</label><textarea name="body24" rows="4" required>مرحبًا {{name}}، نذكّرك بموعد {{course_title}} بتاريخ {{start_time}}. نتطلع لمشاركتك.</textarea><label>عنوان رسالة تذكير 5 دقائق</label><input name="subject5" required maxlength="180" value="يبدأ {{course_title}} بعد 5 دقائق"><label>نص رسالة تذكير 5 دقائق</label><textarea name="body5" rows="4" required>مرحبًا {{name}}، يبدأ {{course_title}} بعد 5 دقائق. موعد البداية: {{start_time}}.</textarea><p><button class="btn p" type="submit">حفظ إعدادات الرسائل</button></p></form><button class="btn s" onclick="loadAdminReminders()">تحديث حالة الإرسال</button></div><div id="admin-reminder-content" class="card">جارٍ تحميل الاشتراكات…</div>`;
+}
+async function loadReminderSettings(){
+ const fm=document.querySelector('#reminder-settings-form');if(!fm)return;
+ if(!AUTH.t||AUTH.role!=='admin'){t('سجّلي الدخول بحساب إدارة لتعديل التذكيرات.');return}
+ try{const rows=await get('reminder_settings?select=id,subject_24h,body_24h,subject_5m,body_5m&id=eq.1');if(!rows.length)return;const r=rows[0];fm.elements.subject24.value=r.subject_24h||fm.elements.subject24.value;fm.elements.body24.value=r.body_24h||fm.elements.body24.value;fm.elements.subject5.value=r.subject_5m||fm.elements.subject5.value;fm.elements.body5.value=r.body_5m||fm.elements.body5.value}catch(e){console.warn('Reminder settings could not be loaded',e);t('تعذّر تحميل إعدادات التذكير؛ طبّقي ملف SQL المرفق أولًا.')}
+}
+async function saveReminderSettings(event,fm){
+ if(event&&event.preventDefault)event.preventDefault();
+ if(!SUPA.url||!AUTH.t||AUTH.role!=='admin'){t('حفظ إعدادات التذكير متاح للإدارة فقط.');return false}
+ const d=Object.fromEntries(new FormData(fm));const b=fm.querySelector('button[type=submit]');const old=b?.textContent;if(b){b.disabled=true;b.textContent='جارٍ الحفظ…'}
+ try{const r=await api('PATCH','reminder_settings?id=eq.1',{subject_24h:d.subject24,body_24h:d.body24,subject_5m:d.subject5,body_5m:d.body5,updated_at:new Date().toISOString()});if(!r.ok){let msg='تعذّر حفظ الإعدادات (HTTP '+r.status+').';try{const x=await r.json();if(x.message)msg+=' '+x.message}catch(_){}throw new Error(msg)}t('حُفظت إعدادات نصوص التذكير. تأكدي من إعداد Resend والجدولة لإرسالها تلقائيًا.')}catch(e){console.error(e);t(e.message||'تعذّر حفظ إعدادات التذكير.')}finally{if(b){b.disabled=false;b.textContent=old||'حفظ إعدادات الرسائل'}}return false;
 }
 async function loadAdminReminders(){
  const target=document.querySelector('#admin-reminder-content');if(!target)return;
  try{const rows=await get('course_reminder_subscriptions?select=id,user_id,course_id,course_title,course_start_at,reminder_24h_sent_at,reminder_5m_sent_at,created_at&order=created_at.desc');
- target.innerHTML=rows.length?tb(['المشترك','البرنامج','الموعد وتحديثه','تذكير 24 ساعة','تذكير 5 دقائق'],rows.map(r=>[X(DB.users.find(u=>u.id==r.user_id)?.name||r.user_id),X(r.course_title||CC(r.course_id).t),`<form onsubmit="return saveReminderDate(this)"><input type="hidden" name="id" value="${XA(r.id)}"><input type="datetime-local" name="start" required value="${r.course_start_at?new Date(new Date(r.course_start_at).getTime()-new Date(r.course_start_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}" style="min-width:190px"><button class="btn s" type="submit">حفظ الموعد</button></form>`,r.reminder_24h_sent_at?'أُرسل':'بانتظار الإرسال',r.reminder_5m_sent_at?'أُرسل':'بانتظار الإرسال'])):em('لا توجد اشتراكات تذكير بعد.');
+ target.innerHTML=rows.length?tb(['المشترك','البرنامج','الموعد وتحديثه','تذكير 24 ساعة','تذكير 5 دقائق'],rows.map(r=>[X(DB.users.find(u=>u.id==r.user_id)?.name||r.user_id),X(r.course_title||CC(r.course_id).t),`<form onsubmit="saveReminderDate(event,this); return false"><input type="hidden" name="id" value="${XA(r.id)}"><input type="datetime-local" name="start" required value="${r.course_start_at?new Date(new Date(r.course_start_at).getTime()-new Date(r.course_start_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}" style="min-width:190px"><button class="btn s" type="submit">حفظ الموعد</button></form>`,r.reminder_24h_sent_at?'أُرسل':'بانتظار الإرسال',r.reminder_5m_sent_at?'أُرسل':'بانتظار الإرسال'])):em('لا توجد اشتراكات تذكير بعد.');
  }catch(e){target.innerHTML=em('تعذّر قراءة الاشتراكات. تأكدي من تطبيق ملف SQL المرفق وسياسات RLS قبل إعادة المحاولة.')}}
-async function saveReminderDate(fm){if(!SUPA.url||AUTH.role!=='admin')return t('هذه العملية متاحة للإدارة فقط'),false;const d=Object.fromEntries(new FormData(fm));const date=new Date(d.start);if(!d.id||Number.isNaN(date.getTime()))return t('أدخلي موعدًا صحيحًا'),false;const r=await api('PATCH','course_reminder_subscriptions?id=eq.'+encodeURIComponent(d.id),{course_start_at:date.toISOString(),reminder_24h_sent_at:null,reminder_5m_sent_at:null,reminder_24h_claimed_at:null,reminder_5m_claimed_at:null});if(!r.ok)return t('تعذّر حفظ الموعد؛ تحققي من صلاحيات قاعدة البيانات'),false;t('حُفظ الموعد وأُعيد ضبط حالة التذكيرات');await loadAdminReminders();return false}
+async function saveReminderDate(event,fm){if(event&&typeof event.preventDefault==='function')event.preventDefault();if(!SUPA.url||AUTH.role!=='admin')return t('هذه العملية متاحة للإدارة فقط'),false;const d=Object.fromEntries(new FormData(fm));const date=new Date(d.start);if(!d.id||Number.isNaN(date.getTime()))return t('أدخلي موعدًا صحيحًا'),false;const r=await api('PATCH','course_reminder_subscriptions?id=eq.'+encodeURIComponent(d.id),{course_start_at:date.toISOString(),reminder_24h_sent_at:null,reminder_5m_sent_at:null,reminder_24h_claimed_at:null,reminder_5m_claimed_at:null});if(!r.ok)return t('تعذّر حفظ الموعد؛ تحققي من صلاحيات قاعدة البيانات'),false;t('حُفظ الموعد وأُعيد ضبط حالة التذكيرات');await loadAdminReminders();return false}
 let SQ='',SC='';
 const subs=()=>DB.users.filter(u=>(!SQ||(u.name+u.email).includes(SQ))&&(!SC||DB.en.some(e=>e.u==u.id&&e.c==SC&&e.st!='cancelled')));
 const nEn=u=>DB.en.filter(e=>e.u==u.id&&e.st!='cancelled').length;
