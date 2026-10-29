@@ -500,6 +500,22 @@ setTimeout(kill,rm?1200:3700)})();</script>
  <div class="w">
   <div class="hero2"><div><h1>بيت الخبرات القانونية</h1><h2 class="gs">من الخبرة إلى التمكين… معرفة قانونية تلتقي بالممارسة المهنية.</h2><p id="ab0"></p><div class="hbt"><a class="hb1" href="https://whatsapp.com/channel/0029Vb8C8890QearJsuXxY2Z" target="_blank" rel="noopener" tabindex="0">انضم إلى مجتمعنا</a><a class="hb2" data-go="courses" tabindex="0">استكشف الدورات والبرامج</a></div></div>
   <div class="hg"><div class="hc t ad" style="--i:var(--ad)" data-lb="1" role="button" tabindex="0" aria-label="عرض إعلان البرنامج القادم كاملًا"><div class="hbd"><span data-i="calendar"></span>برنامج قادم</div></div></div></div>
+  <aside class="desktop-side-visual" aria-label="هوية بيت الخبرات القانونية">
+    <div class="dsv-mark" aria-hidden="true">
+      <svg viewBox="0 0 240 220" role="img" focusable="false">
+        <path d="M120 18 205 65 120 113 35 65Z" fill="#b8c9e8"/>
+        <path d="M120 18 35 65 120 113 120 86 78 63 120 39Z" fill="#073653"/>
+        <path d="M120 78 190 117 120 156 50 117Z" fill="#b89d67"/>
+        <path d="M120 78 50 117 120 156 120 132 87 116 120 98Z" fill="#073653"/>
+        <path d="M75 151v42M120 145v48M165 151v42" stroke="#073653" stroke-width="13" stroke-linecap="round"/>
+        <path d="M24 204h192" stroke="#b89d67" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="dsv-eyebrow">المعرفة القانونية · التمكين المهني</span>
+    <h2>خبرة تُلهم، ومعرفة تصنع الأثر</h2>
+    <p>برامج قانونية وتدريبية من بيت الخبرات القانونية بجامعة الإمام عبدالرحمن بن فيصل.</p>
+    <a class="dsv-link" data-go="courses" tabindex="0">اكتشف البرامج <span aria-hidden="true">←</span></a>
+  </aside>
   <div class="kp" id="stats"></div>
   <figure class="campus" style="--i:var(--hero)"><figcaption><b>في رحاب جامعة الإمام عبدالرحمن بن فيصل</b><span>برامجنا وشراكاتنا تنطلق من بيئة أكاديمية متكاملة</span></figcaption></figure>
  </div>
@@ -1092,7 +1108,44 @@ const mine=()=>DB.en.filter(e=>e.u==ME);
 function myC(){const m=mine();return m.length?tb(['البرنامج','الحالة','التسجيل',''],m.map(e=>[X(CC(e.c).t),`<span class="chip">${ES[e.st]}</span>`,fd(e.at),`<button class="btn s" data-c="${e.c}">فتح</button> ${e.st=='registered'?`<button class="btn s" data-ec="${e.id}">إلغاء</button>`:''}`])):em('لا دورات مسجلة بعد.','<p><button class="btn p" data-go="courses">استعرض الدورات</button></p>')}
 function myCert(){const x=DB.ce.filter(z=>z.u==ME);return x.length?`<div class="grid">${L(x,z=>`<div class="card top cert"><span>${I('award',34)}</span><h3>${X(CC(z.c).t)}</h3><p>${fd(z.at)}</p><p dir="ltr" class="src">${z.s}</p><button class="btn p s" data-pc="${z.s}">${I('print',14)} طباعة / حفظ PDF</button></div>`)}</div>`:em('ستظهر هنا شهادات البرامج المكتملة.')}
 function printCert(sn){const z=DB.ce.find(q=>q.s==sn);if(!z)return;const w=window.open('','_blank');if(!w)return t('اسمح بالنوافذ المنبثقة للطباعة');
- w.document.write(`<!doctype html><html dir="rtl" lang="ar"><meta charset="utf-8"><title>شهادة</title><style>body{margin:0;font-family:Cairo,Tahoma,sans-serif;display:grid;place-items:center;min-height:100vh}.c{width:900px;max-width:96vw;border:14px double #b8975a;padding:50px;text-align:center;color:#0c3254}h1{font-size:44px;margin:10px}h2{font-size:30px}p{font-size:20px}</style><div class="c"><p>جامعة الإمام عبدالرحمن بن فيصل · بيت الخبرات القانونية</p><h1>شهادة إتمام</h1><p>تشهد إدارة بيت الخبرات القانونية بأن</p><h2>${X(UU(z.u).name)}</h2><p>قد أتمّ بنجاح برنامج</p><h2>${X(CC(z.c).t)}</h2><p>بتاريخ ${fd(z.at)}</p><p dir="ltr" style="font-size:14px">${z.s}</p></div><script>onload=()=>print()<\/script>`);w.document.close()}
+ w.document.write(`<!doctype html><html dir="rtl" lang="ar"><meta charset="utf-8"><title>شهادة</title><style>body{margin:0;font-family:Cairo,Tahoma,sans-serif;display:grid;place-items:center;min-height:100vh}.c{width:900px;max-width:96vw;border:14px double #b8975a;padding:50px;text-align:center;color:#0c3254}h1{font-size:44px;margin:10px}h2{font-size:30px}p{font-size:20px}
+/* تحسينات العرض المتجاوب: شاشة الأجهزة اللوحية والحواسيب */
+.desktop-side-visual{display:none}
+@media (min-width:760px){
+  .hero2{grid-template-columns:minmax(0,1fr) minmax(280px,1fr) minmax(190px,.62fr);gap:18px}
+  .desktop-side-visual{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;align-self:stretch;min-width:0;padding:18px 16px;border:1px solid #d8c8a6;border-top:4px solid var(--green);border-radius:22px 22px 22px 6px;background:linear-gradient(155deg,#f8f7f4 0%,#fff 58%,#edf2f8 100%);box-shadow:0 10px 28px #05345312;overflow:hidden}
+  .dsv-mark{width:min(100%,180px);margin:0 auto 8px;aspect-ratio:1/1;display:grid;place-items:center;border-radius:18px;background:radial-gradient(circle at 50% 40%,#fff 0%,#f1f4f8 70%);border:1px solid #e5e0d8}
+  .dsv-mark svg{width:100%;height:100%;max-height:165px}
+  .dsv-eyebrow{font-size:clamp(10px,1vw,12px);font-weight:800;color:#9a7b43;line-height:1.7}
+  .desktop-side-visual h2{font-size:clamp(15px,1.5vw,21px);line-height:1.55;color:var(--deep);margin:5px 0}
+  .desktop-side-visual p{font-size:clamp(11px,1.05vw,14px);line-height:1.8;color:var(--mut);margin:0 0 10px}
+  .dsv-link{display:inline-flex;align-items:center;gap:8px;color:var(--teal);font-weight:800;font-size:13px;cursor:pointer;border-bottom:2px solid #b89d67;padding-bottom:2px}
+}
+@media (min-width:760px) and (max-width:1050px){
+  .hero2{grid-template-columns:minmax(0,1fr) minmax(250px,1fr) minmax(155px,.58fr);gap:12px}
+  .desktop-side-visual{padding:12px}
+  .dsv-mark{width:100%;max-width:135px}
+  .dsv-mark svg{max-height:125px}
+}
+@media (max-width:759px){.desktop-side-visual{display:none}}
+/* بطاقات الدورات: توحيد الارتفاع وإظهار الإعلان كاملًا */
+#cl.grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,255px),1fr));gap:18px;align-items:stretch}
+#cl .cp{height:100%;min-width:0;display:flex;flex-direction:column;gap:8px;border-radius:20px;overflow:hidden;box-shadow:0 5px 18px #0534530b}
+#cl .cp .mt{width:100%!important;max-width:none;aspect-ratio:16/9!important;min-height:0!important;height:auto!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;background-color:#f5f6f8;border:1px solid #e5e0d8;border-radius:14px;box-shadow:none;margin:0 0 4px}
+#cl .cp h3{font-size:clamp(16px,1.4vw,19px);line-height:1.65;min-height:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:2px 0}
+#cl .cp-m{gap:5px}
+#cl .cp-m p{align-items:flex-start;line-height:1.7}
+#cl .cp-f{margin-top:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#cl .cp-f .btn{min-width:0;white-space:normal;line-height:1.5;padding:7px 8px}
+#cl .cp-f .btn:last-child:nth-child(3){grid-column:1/-1}
+#car .slide{align-items:stretch}
+#car .frame{min-width:0;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;background:#f5f6f8}
+#car .frame>*{max-width:100%;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#car .info{min-width:0;display:flex;flex-direction:column;justify-content:center}
+@media(min-width:760px) and (max-width:1050px){#cl.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1051px){#cl.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:520px){#cl.grid{grid-template-columns:minmax(0,1fr)}#cl .cp .mt{aspect-ratio:16/9!important}}
+</style><div class="c"><p>جامعة الإمام عبدالرحمن بن فيصل · بيت الخبرات القانونية</p><h1>شهادة إتمام</h1><p>تشهد إدارة بيت الخبرات القانونية بأن</p><h2>${X(UU(z.u).name)}</h2><p>قد أتمّ بنجاح برنامج</p><h2>${X(CC(z.c).t)}</h2><p>بتاريخ ${fd(z.at)}</p><p dir="ltr" style="font-size:14px">${z.s}</p></div><script>onload=()=>print()<\/script>`);w.document.close()}
 function myRq(){const r=DB.rq.filter(x=>x.u==ME);return `<form class="card" onsubmit="addR(this);return false"><h3>طلب استشارة جديد</h3><div class="row"><div><label>الباقة</label><select name="pk">${L(PK,p=>`<option>${p}</option>`)}</select></div><div><label>المجال</label><select name="f">${L(FIELDS,x=>`<option>${x[0]}</option>`)}</select></div><div><label>الجهة</label><input name="o"></div></div><label>التفاصيل</label><textarea name="d" rows="3" required></textarea><p><button class="btn p">إرسال الطلب</button></p></form><div style="margin-top:12px">${r.length?tb(['الرقم','الباقة','المجال','الحالة'],r.map(x=>[x.ref||x.id,X(x.pk),X(x.f),`<span class="chip">${RS[x.st]}</span>`])):em('لا طلبات بعد.')}</div>`}
 async function addR(fm){const d=Object.fromEntries(new FormData(fm)),ref=mkref();
  if(SUPA.url){if(!await send('consultation_requests',{ref,package_name:d.pk,field:d.f,org_name:d.o,details:d.d}))return t('تعذّر إرسال الطلب'),false;await loadDB()}
