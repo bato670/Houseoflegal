@@ -877,6 +877,7 @@ function courseStartAt(c){
  const m=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(صباح|مساء|ظهر|عصر|ليل|فجر|ص(?![\u0621-\u064A])|م(?![\u0621-\u064A])|am|pm|a\.m\.|p\.m\.)?/i);
  let hh=9,mm=0,mer='';
  if(m){hh=+m[1];mm=m[2]?+m[2]:0;mer=(m[3]||'').toLowerCase()}
+ if(!mer){const k=raw.match(/(صباح|مساء|ظهر|عصر|ليل|فجر|am|pm|a\.m\.|p\.m\.)/i);if(k)mer=k[1].toLowerCase()}
  if(/^(مساء|عصر|م|pm|p\.m\.)$/.test(mer)){if(hh<12)hh+=12}
  else if(mer==='ليل'){hh=hh===12?0:(hh<12?hh+12:hh)}
  else if(/^(صباح|فجر|ص|am|a\.m\.)$/.test(mer)){if(hh===12)hh=0}
@@ -1731,20 +1732,22 @@ function v4ExportReq(only){
 
 /* ---------- 7) إدارة: مركز الشهادات + إرسال بريد الصدور ---------- */
 const _adminCerts0=adminCerts;
+async function v4LoadReg(){if(!SUPA.url||AUTH.role!=='admin')return;const r=await v4get('course_registrations?select=*&order=created_at.desc&limit=3000');V4.reg=r.ok?r.rows:[]}
 function adminCerts2(){
  if(!SUPA.url)return _adminCerts0();
- setTimeout(async()=>{await v4LoadAtt(true);v4CmCount()},0);
+ setTimeout(async()=>{await v4LoadAtt(true);await v4LoadReg();v4CmCount()},0);
  return v4CmCard()+_adminCerts0();
 }
 function v4CmCourses(){
- const ids=[...new Set([...DB.ce.map(z=>String(z.c)),...(V4.att||[]).map(a=>String(a.course_id))])];
+ const ids=[...new Set([...DB.ce.map(z=>String(z.c)),...(V4.att||[]).map(a=>String(a.course_id)),...(V4.reg||[]).map(a=>String(a.course_id))])];
  return ids;
 }
 function v4CmCard(){
  const ids=v4CmCourses(),cur=V4.cmc!==undefined?V4.cmc:'';
- return `<div class="card top" id="cmcard"><h3>${I('inbox',20)} إرسال بريد «صدرت شهادتك»</h3><p class="src">يرسل إلى المستفيدين بريدًا يخبرهم بصدور شهادتهم مباشرة من المنصة. اختاري البرنامج ثم اضغطي إرسال.</p>
- <div class="row"><div><label>البرنامج</label><select data-v4s="cmc"><option value="">كل البرامج التي صدرت لها شهادات</option>${ids.map(i=>`<option value="${XA(i)}"${i===cur?' selected':''}>${X(v4Course(i))}</option>`).join('')}</select></div>
+ return `<div class="card top" id="cmcard"><h3>${I('inbox',20)} إرسال بريد جماعي</h3><p class="src">اكتبي أي رسالة (إشعار، تذكير، شهادة…) وتُرسل لكل المسجّلين في البرنامج، سواء كان لهم حساب في المنصة أو سجّلوا بالتسجيل السريع فقط. اختاري البرنامج ثم اضغطي إرسال.</p>
+ <div class="row"><div><label>البرنامج</label><select data-v4s="cmc"><option value="">كل البرامج</option>${ids.map(i=>`<option value="${XA(i)}"${i===cur?' selected':''}>${X(v4Course(i))}</option>`).join('')}</select></div>
  <div><label>بريد إضافي (اختياري، افصلي بفاصلة)</label><input id="cme" dir="ltr" placeholder="a@x.com, b@y.com" oninput="v4CmCount()"></div></div>
+ <label class="chk"><input type="checkbox" id="cmrg" checked onchange="v4CmCount()"> تضمين المسجّلين بالتسجيل السريع (بدون حساب)</label>
  <label class="chk"><input type="checkbox" id="cmat" checked onchange="v4CmCount()"> تضمين من سجّلوا حضورهم عبر رابط الحضور</label>
  <label>عنوان الرسالة</label><input id="cms" value="صدرت شهادتك — {{course_title}}">
  <label>نص الرسالة (المتغيرات: {{name}} و {{course_title}})</label><textarea id="cmb" rows="6">مرحبًا {{name}}،\n\nيسرّنا إبلاغك بصدور شهادتك في «{{course_title}}». يمكنك الاطلاع عليها والتحقق منها عبر موقع بيت الخبرات القانونية:\n${PUB_URL}\n\nمع أطيب التحيات،\nبيت الخبرات القانونية — جامعة الإمام عبدالرحمن بن فيصل</textarea>
@@ -1754,6 +1757,7 @@ function v4CmRecips(){
  const cid=V4.cmc||'',m=new Map(),add=(e,n)=>{e=String(e||'').trim().toLowerCase();if(v4ok(e)&&!m.has(e))m.set(e,n||'')};
  DB.ce.filter(z=>!cid||String(z.c)===cid).forEach(z=>{const u=DB.users.find(x=>x.id==z.u);if(u)add(u.email,u.name)});
  const at=$('#cmat');if(!at||at.checked)(V4.att||[]).filter(a=>!cid||String(a.course_id)===cid).forEach(a=>add(a.email,a.full_name));
+ const rg=$('#cmrg');if(!rg||rg.checked)(V4.reg||[]).filter(a=>!cid||String(a.course_id)===cid).forEach(a=>add(a.email,a.full_name||a.name));
  const ex=$('#cme');if(ex)ex.value.split(/[,\s;]+/).forEach(x=>add(x,''));
  return [...m].map(([email,name])=>({email,name}));
 }
@@ -1780,7 +1784,8 @@ const _adminRem0=adminReminders;
 function adminReminders2(){
  const h=_adminRem0();if(!SUPA.url)return h;
  setTimeout(v4RemCheck,30);
- return `<div class="card top" id="remchk">جارٍ فحص تفعيل التذكيرات…</div>`+h;
+ setTimeout(async()=>{await v4LoadAtt(true);await v4LoadReg();v4CmCount()},40);
+ return `<div class="card top" id="remchk">جارٍ فحص تفعيل التذكيرات…</div>`+v4CmCard()+h;
 }
 async function v4RemCheck(){
  const el=$('#remchk');if(!el)return;
