@@ -922,6 +922,7 @@ function courseStartAt(c){
  const m=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(صباح|مساء|ظهر|عصر|ليل|فجر|ص(?![\u0621-\u064A])|م(?![\u0621-\u064A])|am|pm|a\.m\.|p\.m\.)?/i);
  let hh=9,mm=0,mer='';
  if(m){hh=+m[1];mm=m[2]?+m[2]:0;mer=(m[3]||'').toLowerCase()}
+ if(!mer){const k=raw.match(/(صباح|مساء|ظهر|عصر|ليل|فجر|am|pm|a\.m\.|p\.m\.)/i);if(k)mer=k[1].toLowerCase()}
  if(/^(مساء|عصر|م|pm|p\.m\.)$/.test(mer)){if(hh<12)hh+=12}
  else if(mer==='ليل'){hh=hh===12?0:(hh<12?hh+12:hh)}
  else if(/^(صباح|فجر|ص|am|a\.m\.)$/.test(mer)){if(hh===12)hh=0}
