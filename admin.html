@@ -1124,10 +1124,67 @@ async function saveReminderSettings(event,fm){
  try{const r=await api('PATCH','reminder_settings?id=eq.1',{subject_24h:d.subject24,body_24h:d.body24,subject_5m:d.subject5,body_5m:d.body5,updated_at:new Date().toISOString()});if(!r.ok){let msg='تعذّر حفظ الإعدادات (HTTP '+r.status+').';try{const x=await r.json();if(x.message)msg+=' '+x.message}catch(_){}throw new Error(msg)}t('حُفظت إعدادات نصوص التذكير. تأكدي من إعداد Resend والجدولة لإرسالها تلقائيًا.')}catch(e){console.error(e);t(e.message||'تعذّر حفظ إعدادات التذكير.')}finally{if(b){b.disabled=false;b.textContent=old||'حفظ إعدادات الرسائل'}}return false;
 }
 async function loadAdminReminders(){
- const target=document.querySelector('#admin-reminder-content');if(!target)return;
- try{const rows=await getX('course_reminder_subscriptions?select=id,user_id,course_id,course_title,course_start_at,reminder_24h_sent_at,reminder_5m_sent_at,last_error,created_at&order=created_at.desc');
- target.innerHTML=rows.length?tb(['المشترك','البرنامج','الموعد وتحديثه','تذكير 24 ساعة','تذكير 5 دقائق'],rows.map(r=>[X(DB.users.find(u=>u.id==r.user_id)?.name||r.user_id),X(r.course_title||CC(r.course_id).t),`<form onsubmit="saveReminderDate(event,this); return false"><input type="hidden" name="id" value="${XA(r.id)}"><input type="datetime-local" name="start" required value="${r.course_start_at?new Date(new Date(r.course_start_at).getTime()-new Date(r.course_start_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}" style="min-width:190px"><button class="btn s" type="submit">حفظ الموعد</button></form>`,r.reminder_24h_sent_at?'أُرسل':'بانتظار الإرسال'+(r.last_error?'<br><small style="color:#b3261e">'+X(r.last_error)+'</small>':''),r.reminder_5m_sent_at?'أُرسل':'بانتظار الإرسال'])):em('لا توجد اشتراكات تذكير بعد.');
- }catch(e){target.innerHTML=em('تعذّر قراءة الاشتراكات ('+X(e&&e.message?e.message:e)+'). شغّلي ملف reminders_setup.sql في Supabase ثم أعيدي المحاولة.')}}
+  const target=document.querySelector('#admin-reminder-content');if(!target)return;
+  if(SUPA.url&&(!AUTH.ok||AUTH.role!=='admin')){target.innerHTML=em('عرض اشتراكات التذكير متاح للإدارة المخوّلة فقط.');return}
+  try{
+    // Keep each reminder row as the base record; optional lookups are indexed in memory
+    // so one-to-many joins cannot multiply reminder rows.
+    const rows=await getX('course_reminder_subscriptions?select=id,user_id,course_id,course_title,course_start_at,reminder_email,reminder_24h_sent_at,reminder_5m_sent_at,last_error,created_at&order=created_at.desc');
+    let registrations=[],profiles=[];
+    if(SUPA.url){
+      const [regResult,profileResult]=await Promise.allSettled([
+        getX('course_registrations?select=*'),
+        getX('profiles?select=id,full_name,email')
+      ]);
+      if(regResult.status==='fulfilled')registrations=Array.isArray(regResult.value)?regResult.value:[];
+      else console.warn('Course registration details unavailable:',regResult.reason);
+      if(profileResult.status==='fulfilled')profiles=Array.isArray(profileResult.value)?profileResult.value:[];
+      else console.warn('Profile details unavailable:',profileResult.reason);
+    }else{
+      registrations=Array.isArray(DB.registrations)?DB.registrations:[];
+      profiles=Array.isArray(DB.users)?DB.users:[];
+    }
+    const clean=v=>v==null?'':String(v).trim();
+    const normEmail=v=>clean(v).toLowerCase();
+    const normCourse=v=>clean(v);
+    const validText=v=>{const x=clean(v);return x&&x.toLowerCase()!=='null'&&x.toLowerCase()!=='undefined'?x:''};
+    const profileById=new Map(profiles.filter(p=>p&&p.id!=null).map(p=>[String(p.id),p]));
+    const regByCourseEmail=new Map();
+    for(const reg of registrations){
+      if(!reg)continue;
+      const email=normEmail(reg.email),course=normCourse(reg.course_id);
+      if(!email||!course)continue;
+      const key=course+'\u0000'+email;
+      if(!regByCourseEmail.has(key))regByCourseEmail.set(key,[]);
+      regByCourseEmail.get(key).push(reg);
+    }
+    const realName=(value,email)=>{
+      const name=validText(value);if(!name)return '';
+      const local=normEmail(email).split('@')[0];
+      return normEmail(name)===local?'':name;
+    };
+    const displayRows=rows.map(r=>{
+      const reminderEmail=validText(r.reminder_email);
+      const profile=r.user_id!=null?profileById.get(String(r.user_id)):null;
+      const profileEmail=validText(profile&&profile.email);
+      const matchEmail=normEmail(reminderEmail||profileEmail);
+      const matches=matchEmail?(regByCourseEmail.get(normCourse(r.course_id)+'\u0000'+matchEmail)||[]):[];
+      const reg=matches.length?matches.slice().sort((a,b)=>clean(b.created_at).localeCompare(clean(a.created_at)))[0]:null;
+      const email=reminderEmail||validText(reg&&reg.email)||profileEmail;
+      const name=realName(reg&&reg.full_name,email)||realName(profile&&profile.full_name,email)||email||'البيانات غير متوفرة';
+      const kind=r.user_id==null?'زائر':'مستخدم مسجل';
+      const courseTitle=validText(r.course_title)||validText(CC(r.course_id).t)||'البيانات غير متوفرة';
+      const startValue=r.course_start_at?new Date(r.course_start_at):null;
+      const localStart=startValue&&!Number.isNaN(startValue.getTime())?new Date(startValue.getTime()-startValue.getTimezoneOffset()*60000).toISOString().slice(0,16):'';
+      return [X(name)+(email?'<br><small>'+X(email)+'</small>':'')+'<br><small class="chip">'+kind+'</small>',
+        X(courseTitle),
+        `<form onsubmit="saveReminderDate(event,this); return false"><input type="hidden" name="id" value="${XA(r.id)}"><input type="datetime-local" name="start" required value="${XA(localStart)}" style="min-width:190px"><button class="btn s" type="submit">حفظ الموعد</button></form>`,
+        r.reminder_24h_sent_at?'أُرسل':'بانتظار الإرسال'+(r.last_error?'<br><small style="color:#b3261e">'+X(r.last_error)+'</small>':''),
+        r.reminder_5m_sent_at?'أُرسل':'بانتظار الإرسال'];
+    });
+    target.innerHTML=rows.length?tb(['المشترك','البرنامج','الموعد وتحديثه','تذكير 24 ساعة','تذكير 5 دقائق'],displayRows):em('لا توجد اشتراكات تذكير بعد.');
+  }catch(e){target.innerHTML=em('تعذّر قراءة الاشتراكات ('+X(e&&e.message?e.message:e)+'). تحققي من صلاحيات الإدارة وسياسات RLS على الجداول المطلوبة.')}
+ }
 async function saveReminderDate(event,fm){if(event&&typeof event.preventDefault==='function')event.preventDefault();if(!SUPA.url||AUTH.role!=='admin')return t('هذه العملية متاحة للإدارة فقط'),false;const d=Object.fromEntries(new FormData(fm));const date=new Date(d.start);if(!d.id||Number.isNaN(date.getTime()))return t('أدخلي موعدًا صحيحًا'),false;const r=await api('PATCH','course_reminder_subscriptions?id=eq.'+encodeURIComponent(d.id),{course_start_at:date.toISOString(),reminder_24h_sent_at:null,reminder_5m_sent_at:null,reminder_24h_claimed_at:null,reminder_5m_claimed_at:null});if(!r.ok)return t('تعذّر حفظ الموعد؛ تحققي من صلاحيات قاعدة البيانات'),false;t('حُفظ الموعد وأُعيد ضبط حالة التذكيرات');await loadAdminReminders();return false}
 let SQ='',SC='';
 const subs=()=>DB.users.filter(u=>(!SQ||(u.name+u.email).includes(SQ))&&(!SC||DB.en.some(e=>e.u==u.id&&e.c==SC&&e.st!='cancelled')));
