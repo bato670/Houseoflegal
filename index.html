@@ -735,7 +735,7 @@ let CF='';
 function fc(){const v=$('#cs').value.trim(),r=pub().filter(c=>(!CF||c.st==CF)&&(!v||c.t.includes(v)));$('#cl').innerHTML=L(r,mini)||em('لا برامج مطابقة.')}
 function nav(en){const h=L(NAV,n=>`<a data-go="${n[0]}" tabindex="0">${en?EN[n[0]]:n[1]}</a>`);$('#nav').innerHTML=h;$('#mm').innerHTML=h}
 function go(id){if(id=='dash'&&SUPA.url&&!AUTH.ok)id='portal';document.querySelectorAll('.pg').forEach(p=>p.classList.toggle('on',p.id==id));document.querySelectorAll('nav a,.mm a').forEach(a=>a.classList.toggle('on',a.dataset.go==id));$('#mm').classList.remove('open');
- $('#bc').innerHTML=id=='home'?'':`<a data-go="home" tabindex="0">الرئيسية</a> / <b>${TT[id]||''}</b>`;scrollTo({top:0,behavior:'auto'});if(!go.n&&ROUTES.includes(id)&&location.hash!='#'+id){try{history.pushState(null,'','#'+id)}catch(e){}}fbCur=id;fbRender()}
+ $('#bc').innerHTML=id=='home'?'':`<a data-go="home" tabindex="0">الرئيسية</a> / <b>${TT[id]||''}</b>`;scrollTo({top:0,behavior:'auto'});if(!go.n&&ROUTES.includes(id)&&location.hash!='#'+id){try{history.pushState(null,'','#'+id)}catch(e){}}try{if(!go.n&&ROUTES.includes(id))sessionStorage.setItem('bk_page',id)}catch(e){}fbCur=id;fbRender()}
 const ROUTES=['home','about','services','courses','calendar','news','partners','contact','join','portal','request','coop'];
 let fbCur='home';const FBK='bk_fb';
 function fbRender(){const v=ST.g(FBK,{})[fbCur];$('#fbq').textContent=v===undefined?'هل كانت هذه الصفحة مفيدة؟':(v?'شكرًا لتقييمك، سعدنا بإفادتك.':'شكرًا، سنعمل على تحسين هذه الصفحة.');$('#fbb').style.display=v===undefined?'':'none'}
@@ -1495,7 +1495,7 @@ async function rqSubmit(fm,kind){const d=Object.fromEntries(new FormData(fm)),co
   scrollTo({top:0,behavior:'smooth'})});}
 const _b4=build;build=function(){_b4();svxRender();if(!$('#rqsheet form'))rqRender();if(!$('#coopsheet form'))coopRender()};
 const _b2=build;build=function(){_b2();stats()};rv();if(SUPA.url&&AUTH.t){restoreSess()}
-build();go.n=1;go('home');go.n=0;if(ROUTES.includes(decodeURIComponent(location.hash.slice(1)))||/^verify(=|$)/.test(decodeURIComponent(location.hash.slice(1))))hashGo();addEventListener('popstate',hashGo);addEventListener('hashchange',hashGo);if(SUPA.url){load();setInterval(()=>{if(!document.hidden)load()},60000)}
+build();go.n=1;go('home');go.n=0;try{const _nv=performance.getEntriesByType('navigation')[0],_p=sessionStorage.getItem('bk_page');if(!location.hash.slice(1)&&_nv&&_nv.type==='reload'&&_p&&_p!=='home'&&ROUTES.includes(_p)){go.n=1;try{go(_p)}finally{go.n=0}}}catch(e){}if(ROUTES.includes(decodeURIComponent(location.hash.slice(1)))||/^verify(=|$)/.test(decodeURIComponent(location.hash.slice(1))))hashGo();addEventListener('popstate',hashGo);addEventListener('hashchange',hashGo);if(SUPA.url){load();setInterval(()=>{if(!document.hidden)load()},60000)}
 /* ===================== v4: سرعة + روابط + حضور + طلبات + شهادات + تذكيرات ===================== */
 const V4={msgs:null,att:null,rep:null,attErr:'',msgErr:'',selAtt:'',selReq:'',rqf:{q:'',s:'',k:''},upd:null,live:0};
 const V4S={new:'جديد',review:'قيد المراجعة',replied:'تم الرد',closed:'مغلق'};
