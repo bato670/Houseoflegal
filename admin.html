@@ -1002,7 +1002,7 @@ async function busy(fm,fn){const b=fm.querySelector('button:not([type=button])')
 const ROLES=['individual','partner','admin'];let LOADERR={};
 const errTxt=k=>{const e=LOADERR[k];return e?(e.s?('رمز '+e.s):'تعذّر الاتصال بالشبكة')+(e.m?' — '+e.m:''):''};
 function clearSess(){AUTH={};ST.s('bk_auth',null);ME=null;DB={users:[],en:[],ce:[],rq:[]};LOADERR={};if(typeof CX!=='undefined'){CX.tpls=CX.fonts=CX.batches=CX.issues=null;CX.res=null;CX.fl=null;CX.tab='new';for(const k in CXB)delete CXB[k];for(const k in CXI)delete CXI[k]}const a=document.querySelector('#dc'),b=document.querySelector('#ds');if(a)a.innerHTML='';if(b)b.innerHTML=''}
-async function signOut(){const t0=AUTH.t;clearSess();ST.s('bk_w',[]);try{if(t0)await fetch(SUPA.url+'/auth/v1/logout',{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+t0}})}catch(e){}}
+async function signOut(){const t0=AUTH.t;clearSess();try{sessionStorage.removeItem('bk_dash')}catch(e){}ST.s('bk_w',[]);try{if(t0)await fetch(SUPA.url+'/auth/v1/logout',{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+t0}})}catch(e){}}
 async function authUser(){const g=()=>fetch(SUPA.url+'/auth/v1/user',{headers:{apikey:SUPA.key,Authorization:'Bearer '+AUTH.t}});let r=await g();if(r.status==401&&await refresh())r=await g();return r.ok?r.json():null}
 async function fetchProfile(id,n=1){let p;for(let k=0;k<n;k++){p=await fetchProfile1(id);if(!p.err||!/لا يوجد سجل/.test(p.err))return p;if(k<n-1)await new Promise(r=>setTimeout(r,700))}return p}
 async function fetchProfile1(id){try{const r=await api('GET','profiles?select=id,role&id=eq.'+encodeURIComponent(id));if(r.status==401||r.status==403)return {err:'اعتُرض الوصول إلى سجل الملف الشخصي (رمز '+r.status+'). راجع سياسات RLS على profiles.'};if(!r.ok)return {err:'تعذّر قراءة سجل الملف الشخصي (رمز '+r.status+').'};const p=await r.json();if(!p.length)return {err:'لا يوجد سجل لهذا الحساب في جدول profiles. تواصل مع الإدارة لإكمال الحساب.'};if(!ROLES.includes(p[0].role))return {err:'دور الحساب غير معتمد أو فارغ ('+(p[0].role||'—')+'). تواصل مع الإدارة.'};return {role:p[0].role}}catch(e){return {err:'تعذّر الاتصال بالخادم للتحقق من الصلاحيات.'}}}
@@ -1010,7 +1010,8 @@ async function startSess(n){const p=await fetchProfile(AUTH.id,n||1);if(p.err){c
 let BG=0;
 function bgLoad(){BG=1;return Promise.allSettled([loadDB(),load(),loadWatchSubscriptions()]).then(()=>{BG=0;if(document.querySelector('#dash.on'))rd2()})}
 async function setSess(d,n){if(!d||!d.access_token||!d.user)return {ok:false,msg:'استجابة المصادقة غير مكتملة'};AUTH={t:d.access_token,r:d.refresh_token,id:d.user.id,em:d.user.email||''};ME=AUTH.id;return startSess(n)}
-async function restoreSess(){let u=null;try{u=await authUser()}catch(e){}if(!u||!u.id){clearSess();return}AUTH.id=u.id;AUTH.em=u.email||AUTH.em||'';ME=u.id;const s=await startSess();if(!s.ok){t(s.msg);return}bgLoad();if(ADMIN_ONLY&&AUTH.role=='admin')dash('admin')}
+function bkDashIdx(){try{const s=JSON.parse(sessionStorage.getItem('bk_dash')||'null');if(s&&s.k==='admin'&&Number.isInteger(s.i)&&s.i>=0&&s.i<DASH.admin.p.length)return s.i}catch(e){}return 0}
+async function restoreSess(){let u=null;try{u=await authUser()}catch(e){}if(!u||!u.id){clearSess();return}AUTH.id=u.id;AUTH.em=u.email||AUTH.em||'';ME=u.id;const s=await startSess();if(!s.ok){t(s.msg);return}bgLoad();if(ADMIN_ONLY&&AUTH.role=='admin')dash('admin',bkDashIdx())}
 const isAdm=()=>!SUPA.url||(AUTH.ok&&AUTH.role==='admin');
 async function loadTbl(key,q){try{const r=await api('GET',q);if(!r.ok){let m='';try{m=(await r.json()).message||''}catch(e){}LOADERR[key]={s:r.status,m};return null}delete LOADERR[key];return await r.json()}catch(e){LOADERR[key]={s:0,m:''};return null}}
 async function loadDB(){const adm=AUTH.role==='admin',uf=adm?'':'&user_id=eq.'+encodeURIComponent(AUTH.id),pf=adm?'':'&id=eq.'+encodeURIComponent(AUTH.id);
@@ -1227,7 +1228,7 @@ async function addC(fm){const d=Object.fromEntries(new FormData(fm)),f=d.img,o={
  CO.push(o);build();dash('admin',AI('إدارة الدورات'));t('حُفظ البرنامج');return false}
 DASH.admin={n:'لوحة الإدارة',p:[['نظرة عامة',admOv],['إدارة الدورات',adminCourses],['المشتركون',admSub],['التسجيلات والشهادات',admEn],['مركز الشهادات',adminCerts],['طلبات الاستشارة والرسائل',admRq],['فريق الإدارة',admTm],['شركاء بيت الخبرات',adminPartners],['متابعة التذكيرات',adminReminders],['معاينة قبل النشر',()=>`<div class="grid">${L(CO.filter(c=>!c.pb),mini)||em('لا مسودات حاليًا.')}</div>`],['الشات بوت',adminBot],['التنبيهات المؤقتة',adminAl],['الإشعارات',adminNt]]};
 let CUR={k:'me',i:0};const rd2=()=>dash(CUR.k,CUR.i),AI=n=>DASH.admin.p.findIndex(x=>x[0]==n);
-const _dash=dash;dash=function(k,i=0){if(SUPA.url){const r=AUTH.ok?AUTH.role:null,ok=k=='me'?!!r:k=='admin'?r==='admin':k=='partner'?(r==='partner'||r==='admin'):false;if(!ok){t(AUTH.t&&!AUTH.ok?'جارٍ التحقق من الجلسة… أعد المحاولة بعد لحظات':r?'ليست لديك صلاحية لهذه اللوحة':'سجّل الدخول أولًا');return go('portal')}}else if(k=='me'&&!ME)loginAs('u1');CUR={k,i};_dash(k,i);$('#ds').innerHTML+='<button data-out="1">'+I('out',16)+' خروج</button>';if(SUPA.url){$('#dc').insertAdjacentHTML('afterbegin',errBar());if(BG)$('#dc').insertAdjacentHTML('afterbegin','<div class="note" role="status">جارٍ تحميل البيانات من قاعدة البيانات…</div>')}};
+const _dash=dash;dash=function(k,i=0){if(SUPA.url){const r=AUTH.ok?AUTH.role:null,ok=k=='me'?!!r:k=='admin'?r==='admin':k=='partner'?(r==='partner'||r==='admin'):false;if(!ok){t(AUTH.t&&!AUTH.ok?'جارٍ التحقق من الجلسة… أعد المحاولة بعد لحظات':r?'ليست لديك صلاحية لهذه اللوحة':'سجّل الدخول أولًا');return go('portal')}}else if(k=='me'&&!ME)loginAs('u1');CUR={k,i};try{sessionStorage.setItem('bk_dash',JSON.stringify({k:k,i:i}))}catch(e){}_dash(k,i);$('#ds').innerHTML+='<button data-out="1">'+I('out',16)+' خروج</button>';if(SUPA.url){$('#dc').insertAdjacentHTML('afterbegin',errBar());if(BG)$('#dc').insertAdjacentHTML('afterbegin','<div class="note" role="status">جارٍ تحميل البيانات من قاعدة البيانات…</div>')}};
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),A=q('[data-lb]'),ec=q('[data-ec]'),pc=q('[data-pc]'),wr=q('[data-wr]'),ux=q('[data-ux]'),av=q('[data-actv]'),ci=q('[data-ic]'),cv=q('[data-csv]'),ou=q('[data-out]');
  if(A)lb(A.dataset.lb);if(e.target.id=='lb'||q('#lbx'))$('#lb').classList.remove('open');
  if(ec)upd('enrollments',ec.dataset.ec,{status:'cancelled'},()=>DB.en.find(z=>z.id==ec.dataset.ec).st='cancelled');
@@ -1524,7 +1525,7 @@ restoreSess=async function(){
  const c=SUPA.url&&AUTH.t&&AUTH.id?ST.g(v4CK(),null):null;
  if(!c||!c.role||c.role!=='admin')return _restore0();
  ME=AUTH.id;AUTH.role=c.role;AUTH.ok=1;
- if(ADMIN_ONLY)dash('admin');
+ if(ADMIN_ONLY)dash('admin',bkDashIdx());
  bgLoad();
  const s=await startSess();
  if(!s.ok){t(s.msg);return}
