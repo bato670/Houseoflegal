@@ -1784,14 +1784,14 @@ function adminReminders2(){
 }
 async function v4RemCheck(){
  const el=$('#remchk');if(!el)return;
- const st=await v4get('reminder_settings?select=id&id=eq.1'),sb=await v4get('course_reminder_subscriptions?select=id,course_start_at,reminder_24h_sent_at,reminder_5m_sent_at,last_error'),fn=await v4fn('send-reminders',{dry_run:true});
+ const st=await v4get('reminder_settings?select=id&id=eq.1'),sb=await v4get('course_reminder_subscriptions?select=id,course_start_at,reminder_24h_sent_at,reminder_5m_sent_at,last_error'),fn=await v4fn('send-course-reminders',{dry_run:true});
  const rows=sb.ok?sb.rows:[],noDate=rows.filter(r=>!r.course_start_at).length,errs=rows.filter(r=>r.last_error).length,pending=rows.filter(r=>r.course_start_at&&(!r.reminder_24h_sent_at||!r.reminder_5m_sent_at)&&new Date(r.course_start_at)>new Date()).length;
  const li=(ok,tx,fix)=>`<li class="${ok?'ok':'bad'}"><b>${ok?'✓':'✗'}</b> ${tx}${!ok&&fix?`<br><small>${fix}</small>`:''}</li>`;
  const fnOk=fn.ok&&fn.data&&!fn.data.error;
  el.innerHTML=`<h3>${I('bell',20)} فحص تفعيل التذكيرات</h3><ul class="chk-list">
  ${li(st.ok&&st.rows.length>0,'نصوص الرسائل محفوظة في قاعدة البيانات','شغّلي ملف bk_setup_v4.sql ثم احفظي النصوص من النموذج أدناه.')}
  ${li(sb.ok,'جدول اشتراكات التذكير يعمل ('+rows.length+' اشتراك، '+pending+' بانتظار الإرسال)','شغّلي reminders_setup.sql في Supabase.')}
- ${li(fnOk,'وظيفة الإرسال send-reminders تعمل'+(fnOk?' — مستحق الآن: '+((fn.data.due24||0)+(fn.data.due5||0)):''),fn.status===404?'لم تُنشر الوظيفة بعد: انشري send-reminders (الملف المرفق) وفعّلي الجدولة من الـSQL.':fn.status===403||fn.status===401?'تأكدي من تسجيل الدخول بحساب إدارة.':'راجعي سجلات الوظيفة في Supabase › Edge Functions.')}
+ ${li(fnOk,'وظيفة الإرسال send-course-reminders تعمل'+(fnOk?' — مستحق الآن: '+((fn.data.due24||0)+(fn.data.due5||0)):''),fn.status===404?'لم تُنشر الوظيفة بعد: انشري send-course-reminders (الملف المرفق) وفعّلي الجدولة من الـSQL.':fn.status===403||fn.status===401?'تأكدي من تسجيل الدخول بحساب إدارة.':'راجعي سجلات الوظيفة في Supabase › Edge Functions.')}
  ${li(noDate===0,'كل الاشتراكات لها موعد بداية'+(noDate?' — '+noDate+' بلا موعد ولن تُرسل لها رسائل':''),'أدخلي الموعد من الجدول أدناه (عمود «الموعد وتحديثه»).')}
  ${li(errs===0,'لا أخطاء إرسال مسجّلة'+(errs?' — '+errs+' اشتراك به خطأ':''),'ستظهر تفاصيل الخطأ تحت عمود حالة الإرسال بالجدول.')}
  </ul><p class="src">الإرسال التلقائي مضمون عند ظهور العلامات الخضراء كلها (الجدولة تعمل كل دقيقة على الخادم، ولا تحتاج فتح الموقع).</p>
@@ -1817,7 +1817,7 @@ document.addEventListener('click',async e=>{
  else if(a==='cmsend')v4CmSend();
  else if(a==='cmcopy'){v4copy(v4CmRecips().map(r=>r.email).join(', '),'نُسخت قائمة البريد')}
  else if(a==='remchk'){$('#remchk').innerHTML='جارٍ الفحص…';v4RemCheck()}
- else if(a==='remnow'){b.disabled=true;const r=await v4fn('send-reminders',{});b.disabled=false;const o=$('#remr');if(o)o.textContent=r.ok&&r.data?('أُرسل 24 ساعة: '+(r.data.sent24||0)+' · 5 دقائق: '+(r.data.sent5||0)+(r.data.failed?' · تعذّر: '+r.data.failed:'')):'تعذّر التنفيذ (رمز '+r.status+')';loadAdminReminders()}
+ else if(a==='remnow'){b.disabled=true;const r=await v4fn('send-course-reminders',{});b.disabled=false;const o=$('#remr');if(o)o.textContent=r.ok&&r.data?('أُرسل 24 ساعة: '+(r.data.sent24||0)+' · 5 دقائق: '+(r.data.sent5||0)+(r.data.failed?' · تعذّر: '+r.data.failed:'')):'تعذّر التنفيذ (رمز '+r.status+')';loadAdminReminders()}
 });
 document.addEventListener('change',async e=>{
  const x=e.target.closest('[data-v4s]');if(!x)return;const a=x.dataset.v4s;
