@@ -403,6 +403,9 @@ footer.ft{margin-top:auto;flex:none}
 .cp-f{margin-top:auto;padding-top:14px;display:flex;gap:8px;flex-wrap:wrap}
 .cp-f .btn{flex:1 1 auto;text-align:center;white-space:nowrap}
 .cp-f .btn.p{flex:1.4 1 auto}
+.grid:has(.cp){align-items:start}
+.cp h3{min-height:0}
+.cp .thumb,.cp>img{aspect-ratio:16/9;width:100%;object-fit:cover}
 .tmr2{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
 .tmr2 s{text-decoration:none;color:var(--green);font-weight:800}
 .tt{display:inline-flex;align-items:center;gap:6px;background:var(--beige);border-radius:12px;padding:1px 4px 1px 10px}
@@ -866,11 +869,18 @@ function courseStartAt(c){
  const d=new Date(`${c.dt}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00+03:00`);
  return Number.isNaN(d.getTime())?null:d.toISOString()
 }
-function subscribeRow(id){const c=CC(id);return api('POST','course_reminder_subscriptions',{user_id:ME,course_id:String(id),course_title:c.t,course_start_at:courseStartAt(c),reminder_email:myEm()||null})}
+function subscribeRow(id,em){const c=CC(id);return api('POST','course_reminder_subscriptions',{user_id:em?null:ME,course_id:String(id),course_title:c.t,course_start_at:courseStartAt(c),reminder_email:em||myEm()||null})}
+async function watchGuest(id,exists){
+ if(exists){ST.s('bk_w',ST.g('bk_w',[]).filter(x=>x!==id));t('أُلغي التنبيه على هذا الجهاز');build();return}
+ const em=rgN(prompt('اكتب بريدك الإلكتروني ليصلك التذكير')||'').trim().toLowerCase();
+ if(!em)return;
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em))return t('البريد الإلكتروني غير صحيح');
+ try{const r=await subscribeRow(id,em);if(!r.ok&&r.status!==409)return t('تعذّر تفعيل التنبيه — '+await dbErr(r));ST.s('bk_w',[...ST.g('bk_w',[]),id]);t('تم تفعيل التنبيه — سيصلك تذكير على '+em);build()}catch(e){console.error(e);t('تعذّر حفظ التنبيه — تحقق من الاتصال')}
+}
 async function watch(id){
  id=String(id);let w=ST.g('bk_w',[]),exists=w.includes(id);
  if(SUPA.url){
-  if(!AUTH.t||!ME){t('لتفعيل التنبيه بالبريد، سجّل الدخول أولًا');go('portal');return}
+  if(!AUTH.t||!ME){return watchGuest(id,exists)}
   try{
    if(exists){
     const r=await api('DELETE','course_reminder_subscriptions?course_id=eq.'+encodeURIComponent(id)+'&user_id=eq.'+encodeURIComponent(ME));
@@ -1070,7 +1080,7 @@ async function rgCall(id,name,email,phone){if(!SUPA.url)return '';const r=await 
 async function regSend(fm,id){const d=Object.fromEntries(new FormData(fm)),e=fm.querySelector('.rg-e'),name=d.name.trim().replace(/\s+/g,' '),email=rgN(d.email).trim().toLowerCase(),phone=rgN(d.phone).replace(/[\s\-()]/g,'');let m='';
  if(name.split(' ').filter(w=>w.length>1).length<3)m='اكتب اسمك الثلاثي (الاسم والأب والعائلة)';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))m='البريد الإلكتروني غير صحيح';else if(!/^\+?\d{9,15}$/.test(phone))m='رقم الجوال غير صحيح';
  e.textContent=m;if(m)return false;const b=fm.querySelector('button'),tx=b.textContent;b.disabled=true;b.textContent='جارٍ التسجيل…';
- try{const url=await rgCall(id,name,email,phone),rec={name,email,phone,url,at:Date.now()},all=ST.g(RG,{});all[String(id)]=rec;ST.s(RG,all);$('#regbox').innerHTML=regCard(id,rec);t('تم التسجيل بنجاح')}catch(x){e.textContent=x.message||'تعذّر التسجيل';b.disabled=false;b.textContent=tx}return false}
+ try{const url=await rgCall(id,name,email,phone),rec={name,email,phone,url,at:Date.now()},all=ST.g(RG,{});all[String(id)]=rec;ST.s(RG,all);try{if(!ME&&SUPA.url&&!isW(id)){const sr=await subscribeRow(id,email);if(sr.ok||sr.status===409)ST.s('bk_w',[...ST.g('bk_w',[]),String(id)])}}catch(_){}$('#regbox').innerHTML=regCard(id,rec);t('تم التسجيل بنجاح')}catch(x){e.textContent=x.message||'تعذّر التسجيل';b.disabled=false;b.textContent=tx}return false}
 async function regRefresh(id){const r=regGet(id);if(!r)return;try{r.url=await rgCall(id,r.name,r.email,r.phone);const all=ST.g(RG,{});all[String(id)]=r;ST.s(RG,all);regInit(id);t(r.url?'تم تحديث الرابط':'لم يُنشر الرابط بعد')}catch(x){t(x.message)}}
 async function reg(id){const c=CC(id);if(SUPA.url?!AUTH.t:!ME){t('سجّل دخولك كفرد مشترك أولًا');go('portal');return}
  const old=DB.en.find(e=>e.u==ME&&e.c==id);if(old&&old.st!='cancelled')return t('أنت مسجل في هذا البرنامج');
