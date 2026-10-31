@@ -738,7 +738,7 @@ function adminCourses(){
  <p class="src">تُحفظ التغييرات في قاعدة بيانات الموقع، وتظهر للزوار عند النشر. تعديل اسم مقدم مرتبط بدورة يحدّث اسمه في بيانات الشركاء أيضًا.</p>
  </form>
  <div style="margin-top:18px"><h3>الدورات المنشورة والمسودات</h3>
- ${CO.length?tb(['البرنامج','مقدمو الدورة','الحالة','النشر','الإجراءات'],CO.map(x=>[X(x.t),X(prv(x).map(p=>p.n).join('، ')||'—'),STL[x.st]||x.st,x.pb?'منشور':'مسودة',`<button class="btn s" data-edit-course="${escVal(x.id)}">تعديل</button> <button class="btn s" data-toggle-course="${escVal(x.id)}">${x.pb?'إخفاء':'نشر'}</button> <button class="btn s" data-delete-course="${escVal(x.id)}">حذف</button> <button class="btn s" data-copy="${XA(courseLink(x.id))}" data-msg="نُسخ رابط التسجيل">رابط التسجيل</button> <button class="btn s" data-copy="${XA(attendLink(x.id))}" data-msg="نُسخ رابط الحضور">رابط الحضور</button>`])):em('لا توجد دورات في قاعدة البيانات حتى الآن.')}
+ ${CO.length?tb(['البرنامج','مقدمو الدورة','الحالة','المسجّلون','النشر','الإجراءات'],CO.map(x=>[X(x.t),X(prv(x).map(p=>p.n).join('، ')||'—'),STL[x.st]||x.st,regCnt(x.id),x.pb?'منشور':'مسودة',`<button class="btn s" data-edit-course="${escVal(x.id)}">تعديل</button> <button class="btn s" data-toggle-course="${escVal(x.id)}">${x.pb?'إخفاء':'نشر'}</button> <button class="btn s" data-delete-course="${escVal(x.id)}">حذف</button> <button class="btn s" data-copy="${XA(courseLink(x.id))}" data-msg="نُسخ رابط التسجيل">رابط التسجيل</button> <button class="btn s" data-copy="${XA(attendLink(x.id))}" data-msg="نُسخ رابط الحضور">رابط الحضور</button>`])):em('لا توجد دورات في قاعدة البيانات حتى الآن.')}
  </div>`;
 }
 function cancelCourseEdit(){EDIT_COURSE_ID=null;dash('admin',AI('إدارة الدورات'))}
@@ -1638,6 +1638,7 @@ async function v4LoadAtt(silent){
 }
 function admAtt(){setTimeout(()=>v4LoadAtt(),0);V4.partial=v4AttRender;return `<div id="attw">${v4AttHtml()}</div>`}
 function v4AttRender(){const el=$('#attw');if(el&&!v4Typing())el.innerHTML=v4AttHtml()}
+function regCnt(id){return (DB.en||[]).filter(e=>String(e.c)===String(id)&&e.st!=='cancelled').length}
 function v4AttHtml(){
  if(V4.attErr)return `<div class="card top" role="alert" style="border-color:#b3261e"><h3>تسجيل الحضور غير مفعّل</h3><p>${X(V4.attErr)}</p></div>`;
  if(V4.att===null)return '<div class="card">جارٍ تحميل سجلات الحضور…</div>';
@@ -1646,7 +1647,8 @@ function v4AttHtml(){
  const cid=V4.selAtt,rows=V4.att.filter(a=>String(a.course_id)===cid),c=CO.find(x=>String(x.id)===cid);
  const cnt=id=>V4.att.filter(a=>String(a.course_id)===id).length;
  return `<div class="card top"><h3>رابط تسجيل الحضور</h3><p class="src">شاركي هذا الرابط مع الحاضرين (أو حوّليه إلى رمز QR وعرضيه في القاعة). عند فتحه يكتب الحاضر اسمه وبريده فتتحول صفحته إلى «أتممتَ البرنامج» ويُحفظ اسمه هنا لإصدار شهادته.</p>
-  <div class="tools"><select data-v4s="attsel" style="max-width:340px">${ids.map(i=>`<option value="${XA(i)}"${i===cid?' selected':''}>${X(v4Course(i))} (${cnt(i)})</option>`).join('')}</select></div>
+  <div class="tools"><select data-v4s="attsel" style="max-width:340px">${ids.map(i=>`<option value="${XA(i)}"${i===cid?' selected':''}>${X(v4Course(i))} (مسجّل ${regCnt(i)} · حضر ${cnt(i)})</option>`).join('')}</select></div>
+  ${cid?kp([[regCnt(cid),'عدد المسجّلين','calendar'],[rows.length,'عدد الحاضرين','check'],[regCnt(cid)?Math.round(rows.length/regCnt(cid)*100)+'%':'—','نسبة الحضور','check']]):''}
   ${cid?`<div class="lnk"><input readonly dir="ltr" value="${XA(attendLink(cid))}" onfocus="this.select()"><button class="btn p s" data-copy="${XA(attendLink(cid))}" data-msg="نُسخ رابط الحضور">نسخ رابط الحضور</button></div>
   <div class="lnk"><input readonly dir="ltr" value="${XA(courseLink(cid))}" onfocus="this.select()"><button class="btn s" data-copy="${XA(courseLink(cid))}" data-msg="نُسخ رابط التسجيل">نسخ رابط التسجيل</button></div>`:''}</div>
  <div class="card" style="margin-top:12px"><div class="tools"><h3 style="margin:0">الحاضرون${c?' — '+X(c.t):''} <span class="chip">${rows.length}</span></h3><span style="flex:1"></span>
